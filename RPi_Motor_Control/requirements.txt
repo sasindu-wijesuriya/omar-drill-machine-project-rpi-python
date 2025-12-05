@@ -1,0 +1,32 @@
+# Core dependencies
+Flask==3.0.0
+Flask-SocketIO==5.3.5
+python-socketio==5.10.0
+simple-websocket==1.0.0
+
+# GPIO libraries
+pigpio==1.78  # For real hardware
+gpiozero==2.0  # For simulation and abstraction
+
+# RTC support
+smbus2==0.4.3  # For I2C communication with DS3231
+
+# Data handling
+python-dateutil==2.8.2
+
+# Web server
+Werkzeug==3.0.1
+
+# Configuration
+PyYAML==6.0.1
+
+# Logging and utilities
+python-json-logger==2.0.7
+
+# Development/Simulation only
+fake-rpi==0.7.1  # Mock RPi.GPIO for development
+
+# Note: Install these on Raspberry Pi for production:
+# sudo apt-get install pigpio python3-pigpio
+# sudo systemctl enable pigpiod
+# sudo systemctl start pigpiod

@@ -1,0 +1,3 @@
+Timestamp,Logic,Error_Type,Error_Message,Stack_Trace,System_State
+2025-12-06 00:21:15.683,System,Startup,module 'eventlet.green.thread' has no attribute 'start_joinable_thread',,
+2025-12-06 00:22:05.047,System,Startup,Invalid async_mode specified,,

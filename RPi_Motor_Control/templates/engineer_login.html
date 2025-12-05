@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engineer Login - RPi Motor Control</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="login-card">
+        <h1>Engineer Access</h1>
+        <p>Password required for engineer menu</p>
+
+        <form id="loginForm" method="POST" action="/api/engineer/login">
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autofocus
+              placeholder="Enter engineer password"
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary">Login</button>
+          <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+
+          <div
+            id="error-message"
+            class="error-message"
+            style="display: none"
+          ></div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const password = document.getElementById("password").value;
+          const errorDiv = document.getElementById("error-message");
+
+          try {
+            const response = await fetch("/api/engineer/login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ password }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              window.location.href = "/engineer";
+            } else {
+              errorDiv.textContent = data.message || "Invalid password";
+              errorDiv.style.display = "block";
+              document.getElementById("password").value = "";
+            }
+          } catch (error) {
+            errorDiv.textContent = "Login failed: " + error.message;
+            errorDiv.style.display = "block";
+          }
+        });
+    </script>
+  </body>
+</html>

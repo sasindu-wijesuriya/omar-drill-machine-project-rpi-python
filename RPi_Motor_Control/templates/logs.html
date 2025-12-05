@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>System Logs - RPi Motor Control</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📊 System Logs</h1>
+        <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+      </div>
+
+      <div class="card">
+        <h2>Log Viewer</h2>
+
+        <div class="log-controls">
+          <div class="form-group">
+            <label for="logType">Log Type:</label>
+            <select id="logType" class="form-control">
+              <option value="operations">Operations Log</option>
+              <option value="parameters">Parameters Log</option>
+              <option value="errors">Errors Log</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="logLines">Lines to show:</label>
+            <select id="logLines" class="form-control">
+              <option value="50">Last 50</option>
+              <option value="100" selected>Last 100</option>
+              <option value="200">Last 200</option>
+              <option value="500">Last 500</option>
+            </select>
+          </div>
+
+          <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+          <button id="clearBtn" class="btn btn-danger">Clear Log</button>
+          <button id="downloadBtn" class="btn btn-success">Download CSV</button>
+        </div>
+
+        <div class="log-display">
+          <table id="logTable" class="log-table">
+            <thead>
+              <tr id="logHeaders">
+                <th>Timestamp</th>
+                <th>Event Type</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="logBody">
+              <tr>
+                <td colspan="3" class="loading">Loading logs...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <strong>Total Operations:</strong>
+            <span id="totalOps">-</span>
+          </div>
+          <div class="stat-item">
+            <strong>Total Errors:</strong>
+            <span id="totalErrors">-</span>
+          </div>
+          <div class="stat-item">
+            <strong>Last Operation:</strong>
+            <span id="lastOp">-</span>
+          </div>
+          <div class="stat-item">
+            <strong>Log Size:</strong>
+            <span id="logSize">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("refreshBtn").addEventListener("click", loadLogs);
+      document.getElementById("clearBtn").addEventListener("click", clearLog);
+      document
+        .getElementById("downloadBtn")
+        .addEventListener("click", downloadLog);
+
+      async function loadLogs() {
+        const logType = document.getElementById("logType").value;
+        const logLines = document.getElementById("logLines").value;
+
+        try {
+          const response = await fetch(
+            `/api/logs/${logType}?lines=${logLines}`
+          );
+          const data = await response.json();
+
+          if (data.success) {
+            displayLogs(data.logs, data.headers);
+            updateStats(data.stats);
+          } else {
+            showError("Failed to load logs: " + data.message);
+          }
+        } catch (error) {
+          showError("Error loading logs: " + error.message);
+        }
+      }
+
+      function displayLogs(logs, headers) {
+        const tbody = document.getElementById("logBody");
+        const theadRow = document.getElementById("logHeaders");
+
+        // Update headers
+        theadRow.innerHTML = headers.map((h) => `<th>${h}</th>`).join("");
+
+        // Display logs
+        if (logs.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="' +
+            headers.length +
+            '" class="no-data">No logs found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = logs
+          .map((log) => {
+            return (
+              "<tr>" + log.map((cell) => `<td>${cell}</td>`).join("") + "</tr>"
+            );
+          })
+          .join("");
+      }
+
+      function updateStats(stats) {
+        if (stats) {
+          document.getElementById("totalOps").textContent =
+            stats.total_operations || "0";
+          document.getElementById("totalErrors").textContent =
+            stats.total_errors || "0";
+          document.getElementById("lastOp").textContent =
+            stats.last_operation || "None";
+          document.getElementById("logSize").textContent =
+            stats.log_size || "0 KB";
+        }
+      }
+
+      async function clearLog() {
+        if (
+          !confirm(
+            "Are you sure you want to clear this log? This cannot be undone."
+          )
+        ) {
+          return;
+        }
+
+        const logType = document.getElementById("logType").value;
+
+        try {
+          const response = await fetch(`/api/logs/${logType}`, {
+            method: "DELETE",
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            alert("Log cleared successfully");
+            loadLogs();
+          } else {
+            showError("Failed to clear log: " + data.message);
+          }
+        } catch (error) {
+          showError("Error clearing log: " + error.message);
+        }
+      }
+
+      function downloadLog() {
+        const logType = document.getElementById("logType").value;
+        window.location.href = `/api/logs/${logType}/download`;
+      }
+
+      function showError(message) {
+        const tbody = document.getElementById("logBody");
+        tbody.innerHTML = `<tr><td colspan="3" class="error">${message}</td></tr>`;
+      }
+
+      // Load logs on page load
+      loadLogs();
+
+      // Auto-refresh every 5 seconds
+      setInterval(loadLogs, 5000);
+    </script>
+  </body>
+</html>

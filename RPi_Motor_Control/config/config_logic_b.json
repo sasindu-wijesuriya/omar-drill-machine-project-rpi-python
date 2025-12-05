@@ -1,0 +1,119 @@
+{
+  "logic_name": "Logic B - CG4n51_L2",
+  "description": "Motor control logic with RTC date checking",
+
+  "motor_pins": {
+    "pulsos1": 18,
+    "dir1": 23,
+    "pulsos2": 24,
+    "dir2": 25
+  },
+
+  "input_pins": {
+    "btn_reset": 17,
+    "btn_start": 27,
+    "btn_stop": 22,
+    "btn_tala": 5,
+    "switch_s": 6,
+    "fin_home": 13,
+    "fin_final": 19,
+    "joystick_adc_channel": 0
+  },
+
+  "rtc_config": {
+    "enabled": true,
+    "i2c_bus": 1,
+    "i2c_address": "0x68",
+    "target_date": {
+      "year": 2027,
+      "month": 10,
+      "day": 13
+    },
+    "lockout_on_target_date": true
+  },
+
+  "motor_parameters": {
+    "pasos_por_vuelta_taladro": 400,
+    "sentido_giro_lineal": true,
+    "sentido_giro_taladro": false,
+    "sentido_ciclos": false
+  },
+
+  "velocidades_ciclo2": {
+    "velocidad_pasos_taladro_ciclo2": 2640,
+    "pasos_taladro_ciclo2": 200,
+    "cantidad_giros_taladro_ciclo2": 3
+  },
+
+  "tiempos": {
+    "tiempo_antes_de_girar_ms": 2000,
+    "tiempo_para_empezar_despues_stop_ms": 2000
+  },
+
+  "velocidades_lineal": {
+    "nivel1": 3900,
+    "nivel2": 7000,
+    "nivel3": 3200,
+    "nivel4": 3200,
+    "nivel5": 7000,
+    "home": 4000
+  },
+
+  "velocidades_taladro": {
+    "nivel1": 2860,
+    "nivel2": 2200,
+    "nivel3": 2200,
+    "nivel4": 2200,
+    "nivel5": 2200,
+    "default": 2200
+  },
+
+  "velocidades_manual": {
+    "limite_inferior": 1500,
+    "limite_superior": 2500
+  },
+
+  "pasos_home": {
+    "pasos_despues_home": 425
+  },
+
+  "pasos_primer_nivel": {
+    "nivel1": 175,
+    "nivel2": 380,
+    "nivel3": 380,
+    "nivel4": 380,
+    "nivel5": 380
+  },
+
+  "pasos_acomodo_segundo_nivel": {
+    "nivel1": 10,
+    "nivel2": 305,
+    "nivel3": 305,
+    "nivel4": 305,
+    "nivel5": 305
+  },
+
+  "pasos_segundo_nivel": {
+    "nivel1": 390,
+    "nivel2": 80,
+    "nivel3": 80,
+    "nivel4": 80,
+    "nivel5": 80
+  },
+
+  "vueltas_primer_nivel": {
+    "nivel1": 100,
+    "nivel2": 400,
+    "nivel3": 500,
+    "nivel4": 400,
+    "nivel5": 50
+  },
+
+  "vueltas_segundo_nivel": {
+    "nivel1": 1000,
+    "nivel2": 800,
+    "nivel3": 1000,
+    "nivel4": 800,
+    "nivel5": 20
+  }
+}

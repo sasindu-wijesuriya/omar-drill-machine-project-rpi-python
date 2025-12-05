@@ -1,0 +1,10 @@
+Timestamp,Logic,Mode,Operation,Status,Cycle_Count,Position,Details
+2025-12-06 00:23:17.707,System,Startup,Initialize,Success,0,,
+2025-12-06 00:24:32.735,System,Selection,LogicA,Selected,0,,
+2025-12-06 00:37:57.548,System,Startup,Initialize,Success,0,,
+2025-12-06 00:38:09.379,System,Selection,LogicB,Selected,0,,
+2025-12-06 00:38:09.382,System,Selection,LogicB,Selected,0,,
+2025-12-06 00:38:09.387,System,Selection,LogicB,Selected,0,,
+2025-12-06 00:38:13.711,System,Selection,LogicA,Selected,0,,
+2025-12-06 00:38:15.878,System,Selection,LogicB,Selected,0,,
+2025-12-06 00:41:39.233,System,Selection,LogicA,Selected,0,,

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engineer Menu - RPi Motor Control</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔧 Engineer Menu</h1>
+        <div class="header-actions">
+          <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+          <button id="logoutBtn" class="btn btn-danger">Logout</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Configuration Editor</h2>
+        <p class="warning">
+          ⚠️ Warning: Changes will take effect immediately. Only modify if you
+          know what you're doing.
+        </p>
+
+        <div class="config-selector">
+          <label for="configType">Select Configuration:</label>
+          <select id="configType" class="form-control">
+            <option value="logic_a">Logic A Configuration</option>
+            <option value="logic_b">Logic B Configuration</option>
+            <option value="system">System Configuration</option>
+          </select>
+        </div>
+
+        <div id="configEditor">
+          <textarea
+            id="configJson"
+            rows="20"
+            class="config-textarea"
+            placeholder="Loading configuration..."
+          ></textarea>
+        </div>
+
+        <div class="button-group">
+          <button id="loadBtn" class="btn btn-primary">
+            Load Configuration
+          </button>
+          <button id="saveBtn" class="btn btn-success">Save Changes</button>
+          <button id="resetBtn" class="btn btn-warning">
+            Reset to Original
+          </button>
+        </div>
+
+        <div id="message" class="message" style="display: none"></div>
+      </div>
+
+      <div class="card">
+        <h2>System Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <strong>Current Logic:</strong>
+            <span id="currentLogic">-</span>
+          </div>
+          <div class="info-item">
+            <strong>Current Mode:</strong>
+            <span id="currentMode">-</span>
+          </div>
+          <div class="info-item">
+            <strong>System State:</strong>
+            <span id="systemState">-</span>
+          </div>
+          <div class="info-item">
+            <strong>Hardware Mode:</strong>
+            <span id="hardwareMode"
+              >{{ 'SIMULATION' if simulate else 'REAL HARDWARE' }}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let originalConfig = "";
+
+      document.getElementById("loadBtn").addEventListener("click", loadConfig);
+      document.getElementById("saveBtn").addEventListener("click", saveConfig);
+      document
+        .getElementById("resetBtn")
+        .addEventListener("click", resetConfig);
+      document.getElementById("logoutBtn").addEventListener("click", logout);
+
+      async function loadConfig() {
+        const configType = document.getElementById("configType").value;
+        const messageDiv = document.getElementById("message");
+
+        try {
+          const response = await fetch(`/api/config/${configType}`);
+          const data = await response.json();
+
+          if (data.success) {
+            originalConfig = JSON.stringify(data.config, null, 2);
+            document.getElementById("configJson").value = originalConfig;
+            showMessage("Configuration loaded successfully", "success");
+          } else {
+            showMessage(
+              "Failed to load configuration: " + data.message,
+              "error"
+            );
+          }
+        } catch (error) {
+          showMessage("Error loading configuration: " + error.message, "error");
+        }
+      }
+
+      async function saveConfig() {
+        const configType = document.getElementById("configType").value;
+        const configText = document.getElementById("configJson").value;
+
+        try {
+          const config = JSON.parse(configText);
+
+          const response = await fetch(`/api/config/${configType}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ config }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            originalConfig = configText;
+            showMessage("Configuration saved successfully", "success");
+          } else {
+            showMessage("Failed to save: " + data.message, "error");
+          }
+        } catch (error) {
+          showMessage("Error: " + error.message, "error");
+        }
+      }
+
+      function resetConfig() {
+        if (originalConfig) {
+          document.getElementById("configJson").value = originalConfig;
+          showMessage("Configuration reset to original", "info");
+        }
+      }
+
+      async function logout() {
+        try {
+          await fetch("/api/engineer/logout", { method: "POST" });
+          window.location.href = "/";
+        } catch (error) {
+          console.error("Logout error:", error);
+          window.location.href = "/";
+        }
+      }
+
+      function showMessage(text, type) {
+        const messageDiv = document.getElementById("message");
+        messageDiv.textContent = text;
+        messageDiv.className = "message " + type;
+        messageDiv.style.display = "block";
+
+        setTimeout(() => {
+          messageDiv.style.display = "none";
+        }, 5000);
+      }
+
+      // Load default config on page load
+      loadConfig();
+
+      // Auto-refresh status
+      setInterval(async () => {
+        try {
+          const response = await fetch("/api/status");
+          const status = await response.json();
+
+          document.getElementById("currentLogic").textContent =
+            status.selected_logic || "None";
+          document.getElementById("currentMode").textContent =
+            status.selected_mode || "None";
+          document.getElementById("systemState").textContent =
+            status.state || "Unknown";
+        } catch (error) {
+          console.error("Status update error:", error);
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,548 @@
+2025-12-06 00:21:15,335 - __main__ - INFO - Loaded system configuration from F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\config\system_config.json
+2025-12-06 00:21:15,336 - __main__ - INFO - Starting Motor Control System (simulate=True)
+2025-12-06 00:21:15,337 - __main__ - INFO - Initializing system components...
+2025-12-06 00:21:15,338 - __main__ - INFO - Initializing hardware interface...
+2025-12-06 00:21:15,338 - src.hardware_interface - INFO - Using SIMULATED hardware interface
+2025-12-06 00:21:15,339 - src.hardware_interface - INFO - Initializing SIMULATED GPIO interface
+2025-12-06 00:21:15,339 - src.hardware_interface - INFO - Simulated GPIO initialized - Use this for development only!
+2025-12-06 00:21:15,340 - __main__ - INFO - Initializing CSV logger...
+2025-12-06 00:21:15,341 - src.logger - INFO - Created operations log: logs\operations_20251206.csv
+2025-12-06 00:21:15,342 - src.logger - INFO - Created parameters log: logs\parameters_20251206.csv
+2025-12-06 00:21:15,376 - src.logger - INFO - Created errors log: logs\errors_20251206.csv
+2025-12-06 00:21:15,376 - src.logger - INFO - CSV Logger initialized in directory: logs
+2025-12-06 00:21:15,377 - __main__ - INFO - Initializing execution manager...
+2025-12-06 00:21:15,415 - src.logic_a - INFO - Loaded configuration: Logic A - CG4n51_L1
+2025-12-06 00:21:15,415 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 00:21:15,415 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 00:21:15,415 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 00:21:15,416 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 00:21:15,416 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 00:21:15,416 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 00:21:15,417 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 00:21:15,417 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 00:21:15,417 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 00:21:15,418 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 00:21:15,418 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 00:21:15,419 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 00:21:15,419 - src.logic_a - INFO - Logic A initialized
+2025-12-06 00:21:15,444 - src.logic_a - INFO - Loaded configuration: Logic B - CG4n51_L2
+2025-12-06 00:21:15,444 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 00:21:15,444 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 00:21:15,445 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 00:21:15,445 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 00:21:15,445 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 00:21:15,445 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 00:21:15,445 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 00:21:15,445 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 00:21:15,446 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 00:21:15,446 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 00:21:15,446 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 00:21:15,446 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 00:21:15,446 - src.logic_a - INFO - Logic A initialized
+2025-12-06 00:21:15,446 - src.rtc_handler - INFO - RTC Handler initialized (SIMULATED - using system time)
+2025-12-06 00:21:15,447 - src.logic_b - INFO - Logic B initialized with RTC support
+2025-12-06 00:21:15,447 - src.execution_manager - INFO - Execution Manager initialized
+2025-12-06 00:21:15,448 - __main__ - INFO - Initializing web server...
+2025-12-06 00:21:15,664 - __main__ - CRITICAL - System initialization failed: module 'eventlet.green.thread' has no attribute 'start_joinable_thread'
+Traceback (most recent call last):
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\main.py", line 118, in initialize
+    self.web_server = create_web_server(self.execution_manager, web_config)
+                      ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 347, in create_web_server
+    return WebServer(execution_manager, config)
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 48, in __init__
+    self.socketio = SocketIO(self.app, cors_allowed_origins="*", async_mode='eventlet')
+                    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask_socketio\__init__.py", line 187, in __init__
+    self.init_app(app, **kwargs)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask_socketio\__init__.py", line 243, in init_app
+    self.server = socketio.Server(**self.server_options)
+                  ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\socketio\base_server.py", line 31, in __init__
+    self.eio = self._engineio_server_class()(**engineio_options)
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\engineio\base_server.py", line 83, in __init__
+    self._async = importlib.import_module(
+                  ~~~~~~~~~~~~~~~~~~~~~~~^
+        'engineio.async_drivers.' + mode)._async
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Python313\Lib\site-packages\engineio\async_drivers\eventlet.py", line 1, in <module>
+    from eventlet.green.threading import Event
+  File "C:\Python313\Lib\site-packages\eventlet\green\threading.py", line 18, in <module>
+    eventlet.patcher.inject(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        'threading',
+        ^^^^^^^^^^^^
+        globals(),
+        ^^^^^^^^^^
+        ('_thread', thread),
+        ^^^^^^^^^^^^^^^^^^^^
+        ('time', time))
+        ^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\eventlet\patcher.py", line 109, in inject
+    module = __import__(module_name, {}, {}, module_name.split('.')[:-1])
+  File "C:\Python313\Lib\threading.py", line 35, in <module>
+    _start_joinable_thread = _thread.start_joinable_thread
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'eventlet.green.thread' has no attribute 'start_joinable_thread'
+2025-12-06 00:21:15,683 - src.logger - ERROR - Error logged: Startup - module 'eventlet.green.thread' has no attribute 'start_joinable_thread'
+2025-12-06 00:21:15,683 - __main__ - CRITICAL - Fatal error: module 'eventlet.green.thread' has no attribute 'start_joinable_thread'
+Traceback (most recent call last):
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\main.py", line 244, in main
+    system.initialize()
+    ~~~~~~~~~~~~~~~~~^^
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\main.py", line 118, in initialize
+    self.web_server = create_web_server(self.execution_manager, web_config)
+                      ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 347, in create_web_server
+    return WebServer(execution_manager, config)
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 48, in __init__
+    self.socketio = SocketIO(self.app, cors_allowed_origins="*", async_mode='eventlet')
+                    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask_socketio\__init__.py", line 187, in __init__
+    self.init_app(app, **kwargs)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask_socketio\__init__.py", line 243, in init_app
+    self.server = socketio.Server(**self.server_options)
+                  ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\socketio\base_server.py", line 31, in __init__
+    self.eio = self._engineio_server_class()(**engineio_options)
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\engineio\base_server.py", line 83, in __init__
+    self._async = importlib.import_module(
+                  ~~~~~~~~~~~~~~~~~~~~~~~^
+        'engineio.async_drivers.' + mode)._async
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Python313\Lib\site-packages\engineio\async_drivers\eventlet.py", line 1, in <module>
+    from eventlet.green.threading import Event
+  File "C:\Python313\Lib\site-packages\eventlet\green\threading.py", line 18, in <module>
+    eventlet.patcher.inject(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        'threading',
+        ^^^^^^^^^^^^
+        globals(),
+        ^^^^^^^^^^
+        ('_thread', thread),
+        ^^^^^^^^^^^^^^^^^^^^
+        ('time', time))
+        ^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\eventlet\patcher.py", line 109, in inject
+    module = __import__(module_name, {}, {}, module_name.split('.')[:-1])
+  File "C:\Python313\Lib\threading.py", line 35, in <module>
+    _start_joinable_thread = _thread.start_joinable_thread
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'eventlet.green.thread' has no attribute 'start_joinable_thread'
+2025-12-06 00:22:05,034 - __main__ - INFO - Loaded system configuration from F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\config\system_config.json
+2025-12-06 00:22:05,035 - __main__ - INFO - Starting Motor Control System (simulate=True)
+2025-12-06 00:22:05,035 - __main__ - INFO - Initializing system components...
+2025-12-06 00:22:05,035 - __main__ - INFO - Initializing hardware interface...
+2025-12-06 00:22:05,035 - src.hardware_interface - INFO - Using SIMULATED hardware interface
+2025-12-06 00:22:05,035 - src.hardware_interface - INFO - Initializing SIMULATED GPIO interface
+2025-12-06 00:22:05,035 - src.hardware_interface - INFO - Simulated GPIO initialized - Use this for development only!
+2025-12-06 00:22:05,036 - __main__ - INFO - Initializing CSV logger...
+2025-12-06 00:22:05,036 - src.logger - INFO - CSV Logger initialized in directory: logs
+2025-12-06 00:22:05,036 - __main__ - INFO - Initializing execution manager...
+2025-12-06 00:22:05,037 - src.logic_a - INFO - Loaded configuration: Logic A - CG4n51_L1
+2025-12-06 00:22:05,037 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 00:22:05,037 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 00:22:05,037 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 00:22:05,037 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 00:22:05,038 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 00:22:05,038 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 00:22:05,038 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 00:22:05,038 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 00:22:05,038 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 00:22:05,038 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 00:22:05,038 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 00:22:05,039 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 00:22:05,039 - src.logic_a - INFO - Logic A initialized
+2025-12-06 00:22:05,039 - src.logic_a - INFO - Loaded configuration: Logic B - CG4n51_L2
+2025-12-06 00:22:05,039 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 00:22:05,040 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 00:22:05,040 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 00:22:05,040 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 00:22:05,040 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 00:22:05,040 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 00:22:05,040 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 00:22:05,041 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 00:22:05,041 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 00:22:05,041 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 00:22:05,041 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 00:22:05,041 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 00:22:05,041 - src.logic_a - INFO - Logic A initialized
+2025-12-06 00:22:05,041 - src.rtc_handler - INFO - RTC Handler initialized (SIMULATED - using system time)
+2025-12-06 00:22:05,041 - src.logic_b - INFO - Logic B initialized with RTC support
+2025-12-06 00:22:05,041 - src.execution_manager - INFO - Execution Manager initialized
+2025-12-06 00:22:05,042 - __main__ - INFO - Initializing web server...
+2025-12-06 00:22:05,044 - __main__ - CRITICAL - System initialization failed: Invalid async_mode specified
+Traceback (most recent call last):
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\main.py", line 118, in initialize
+    self.web_server = create_web_server(self.execution_manager, web_config)
+                      ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 347, in create_web_server
+    return WebServer(execution_manager, config)
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 48, in __init__
+    self.socketio = SocketIO(self.app, cors_allowed_origins="*", async_mode='eventlet')
+                    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask_socketio\__init__.py", line 187, in __init__
+    self.init_app(app, **kwargs)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask_socketio\__init__.py", line 243, in init_app
+    self.server = socketio.Server(**self.server_options)
+                  ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\socketio\base_server.py", line 31, in __init__
+    self.eio = self._engineio_server_class()(**engineio_options)
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\engineio\base_server.py", line 94, in __init__
+    raise ValueError('Invalid async_mode specified')
+ValueError: Invalid async_mode specified
+2025-12-06 00:22:05,048 - src.logger - ERROR - Error logged: Startup - Invalid async_mode specified
+2025-12-06 00:22:05,048 - __main__ - CRITICAL - Fatal error: Invalid async_mode specified
+Traceback (most recent call last):
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\main.py", line 244, in main
+    system.initialize()
+    ~~~~~~~~~~~~~~~~~^^
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\main.py", line 118, in initialize
+    self.web_server = create_web_server(self.execution_manager, web_config)
+                      ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 347, in create_web_server
+    return WebServer(execution_manager, config)
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 48, in __init__
+    self.socketio = SocketIO(self.app, cors_allowed_origins="*", async_mode='eventlet')
+                    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask_socketio\__init__.py", line 187, in __init__
+    self.init_app(app, **kwargs)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask_socketio\__init__.py", line 243, in init_app
+    self.server = socketio.Server(**self.server_options)
+                  ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\socketio\base_server.py", line 31, in __init__
+    self.eio = self._engineio_server_class()(**engineio_options)
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\engineio\base_server.py", line 94, in __init__
+    raise ValueError('Invalid async_mode specified')
+ValueError: Invalid async_mode specified
+2025-12-06 00:23:17,659 - __main__ - INFO - Loaded system configuration from F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\config\system_config.json
+2025-12-06 00:23:17,659 - __main__ - INFO - Starting Motor Control System (simulate=True)
+2025-12-06 00:23:17,659 - __main__ - INFO - Initializing system components...
+2025-12-06 00:23:17,660 - __main__ - INFO - Initializing hardware interface...
+2025-12-06 00:23:17,660 - src.hardware_interface - INFO - Using SIMULATED hardware interface
+2025-12-06 00:23:17,660 - src.hardware_interface - INFO - Initializing SIMULATED GPIO interface
+2025-12-06 00:23:17,660 - src.hardware_interface - INFO - Simulated GPIO initialized - Use this for development only!
+2025-12-06 00:23:17,660 - __main__ - INFO - Initializing CSV logger...
+2025-12-06 00:23:17,661 - src.logger - INFO - CSV Logger initialized in directory: logs
+2025-12-06 00:23:17,661 - __main__ - INFO - Initializing execution manager...
+2025-12-06 00:23:17,661 - src.logic_a - INFO - Loaded configuration: Logic A - CG4n51_L1
+2025-12-06 00:23:17,661 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 00:23:17,661 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 00:23:17,662 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 00:23:17,662 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 00:23:17,662 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 00:23:17,662 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 00:23:17,662 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 00:23:17,662 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 00:23:17,662 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 00:23:17,663 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 00:23:17,663 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 00:23:17,663 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 00:23:17,663 - src.logic_a - INFO - Logic A initialized
+2025-12-06 00:23:17,663 - src.logic_a - INFO - Loaded configuration: Logic B - CG4n51_L2
+2025-12-06 00:23:17,663 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 00:23:17,663 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 00:23:17,663 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 00:23:17,664 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 00:23:17,664 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 00:23:17,664 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 00:23:17,664 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 00:23:17,664 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 00:23:17,664 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 00:23:17,664 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 00:23:17,664 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 00:23:17,664 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 00:23:17,664 - src.logic_a - INFO - Logic A initialized
+2025-12-06 00:23:17,665 - src.rtc_handler - INFO - RTC Handler initialized (SIMULATED - using system time)
+2025-12-06 00:23:17,665 - src.logic_b - INFO - Logic B initialized with RTC support
+2025-12-06 00:23:17,665 - src.execution_manager - INFO - Execution Manager initialized
+2025-12-06 00:23:17,665 - __main__ - INFO - Initializing web server...
+2025-12-06 00:23:17,706 - src.web_server - INFO - Web server initialized
+2025-12-06 00:23:17,706 - __main__ - INFO - System initialization complete
+2025-12-06 00:23:17,707 - __main__ - INFO - ============================================================
+2025-12-06 00:23:17,707 - __main__ - INFO - RPi Motor Control System Starting
+2025-12-06 00:23:17,707 - __main__ - INFO - Mode: SIMULATION
+2025-12-06 00:23:17,708 - __main__ - INFO - ============================================================
+2025-12-06 00:23:17,708 - __main__ - INFO - Web interface will be available at: http://0.0.0.0:5000
+2025-12-06 00:23:17,708 - src.web_server - INFO - Starting web server on 0.0.0.0:5000
+2025-12-06 00:23:17,722 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.3:5000
+2025-12-06 00:23:17,722 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-12-06 00:23:35,523 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:23:35] "GET /?id=34ec648c-7c6d-4d45-b51c-a58ef9a8a73e&vscodeBrowserReqId=1764960815463 HTTP/1.1" 200 -
+2025-12-06 00:23:35,630 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:23:35] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-12-06 00:23:35,641 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:23:35] "GET /static/js/main.js HTTP/1.1" 200 -
+2025-12-06 00:23:35,875 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:23:35] "GET /api/status HTTP/1.1" 200 -
+2025-12-06 00:23:35,875 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:23:35] "GET /socket.io/?EIO=4&transport=polling&t=PhltCh_ HTTP/1.1" 200 -
+2025-12-06 00:23:35,884 - src.web_server - INFO - Client connected: ShPcFRgB9v1STHZqAAAB
+2025-12-06 00:23:35,884 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:23:35] "POST /socket.io/?EIO=4&transport=polling&t=PhltCi8&sid=FrkPQkBlMd2EPoOEAAAA HTTP/1.1" 200 -
+2025-12-06 00:23:35,892 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:23:35] "GET /socket.io/?EIO=4&transport=polling&t=PhltCiB&sid=FrkPQkBlMd2EPoOEAAAA HTTP/1.1" 200 -
+2025-12-06 00:23:35,899 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:23:35] "GET /socket.io/?EIO=4&transport=polling&t=PhltCiO&sid=FrkPQkBlMd2EPoOEAAAA HTTP/1.1" 200 -
+2025-12-06 00:24:20,804 - src.web_server - INFO - Client disconnected: ShPcFRgB9v1STHZqAAAB
+2025-12-06 00:24:20,804 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:20] "GET /socket.io/?EIO=4&transport=websocket&sid=FrkPQkBlMd2EPoOEAAAA HTTP/1.1" 200 -
+2025-12-06 00:24:20,809 - src.web_server - ERROR - Exception on /engineer [GET]
+Traceback (most recent call last):
+  File "C:\Python313\Lib\site-packages\flask\app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python313\Lib\site-packages\flask\app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python313\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python313\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 79, in engineer
+    return render_template('engineer_login.html')
+  File "C:\Python313\Lib\site-packages\flask\templating.py", line 151, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Python313\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Python313\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: engineer_login.html
+2025-12-06 00:24:20,813 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:20] "[35m[1mGET /engineer HTTP/1.1[0m" 500 -
+2025-12-06 00:24:23,771 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:23] "GET /socket.io/?EIO=4&transport=polling&t=PhltOOP HTTP/1.1" 200 -
+2025-12-06 00:24:23,776 - src.web_server - INFO - Client connected: Lr5uDz9RQwPWGVOlAAAD
+2025-12-06 00:24:23,777 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:23] "POST /socket.io/?EIO=4&transport=polling&t=PhltOOT&sid=-UwKPBNt4uOJk7k9AAAC HTTP/1.1" 200 -
+2025-12-06 00:24:23,778 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:23] "GET /socket.io/?EIO=4&transport=polling&t=PhltOOU&sid=-UwKPBNt4uOJk7k9AAAC HTTP/1.1" 200 -
+2025-12-06 00:24:24,916 - src.web_server - INFO - Client disconnected: Lr5uDz9RQwPWGVOlAAAD
+2025-12-06 00:24:24,917 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:24] "GET /socket.io/?EIO=4&transport=websocket&sid=-UwKPBNt4uOJk7k9AAAC HTTP/1.1" 200 -
+2025-12-06 00:24:24,921 - src.web_server - ERROR - Exception on /logs [GET]
+Traceback (most recent call last):
+  File "C:\Python313\Lib\site-packages\flask\app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python313\Lib\site-packages\flask\app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python313\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python313\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\src\web_server.py", line 85, in logs
+    return render_template('logs.html')
+  File "C:\Python313\Lib\site-packages\flask\templating.py", line 151, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Python313\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Python313\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: logs.html
+2025-12-06 00:24:24,923 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:24] "[35m[1mGET /logs HTTP/1.1[0m" 500 -
+2025-12-06 00:24:28,586 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:28] "GET /socket.io/?EIO=4&transport=polling&t=PhltPZe HTTP/1.1" 200 -
+2025-12-06 00:24:28,591 - src.web_server - INFO - Client connected: AuvJtQJpT7XyeAFFAAAF
+2025-12-06 00:24:28,592 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:28] "POST /socket.io/?EIO=4&transport=polling&t=PhltPZj&sid=rUxkOAMCEyB3uzHPAAAE HTTP/1.1" 200 -
+2025-12-06 00:24:28,593 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:28] "GET /socket.io/?EIO=4&transport=polling&t=PhltPZj.0&sid=rUxkOAMCEyB3uzHPAAAE HTTP/1.1" 200 -
+2025-12-06 00:24:32,735 - src.execution_manager - INFO - Logic A selected
+2025-12-06 00:24:32,736 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:24:32] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 00:24:34,391 - src.logic_a - INFO - Finding home position
+2025-12-06 00:24:34,392 - src.web_server - ERROR - Broadcast error: Server.emit() got an unexpected keyword argument 'broadcast'
+2025-12-06 00:27:34,915 - __main__ - INFO - Received signal 2
+2025-12-06 00:27:34,916 - __main__ - INFO - Shutting down system...
+2025-12-06 00:27:34,917 - __main__ - INFO - Stopping execution manager...
+2025-12-06 00:27:34,917 - src.execution_manager - CRITICAL - EMERGENCY STOP triggered
+2025-12-06 00:37:57,482 - __main__ - INFO - Loaded system configuration from F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\config\system_config.json
+2025-12-06 00:37:57,482 - __main__ - INFO - Starting Motor Control System (simulate=True)
+2025-12-06 00:37:57,482 - __main__ - INFO - Initializing system components...
+2025-12-06 00:37:57,483 - __main__ - INFO - Initializing hardware interface...
+2025-12-06 00:37:57,483 - src.hardware_interface - INFO - Using SIMULATED hardware interface
+2025-12-06 00:37:57,483 - src.hardware_interface - INFO - Initializing SIMULATED GPIO interface
+2025-12-06 00:37:57,483 - src.hardware_interface - INFO - Simulated GPIO initialized - Use this for development only!
+2025-12-06 00:37:57,483 - __main__ - INFO - Initializing CSV logger...
+2025-12-06 00:37:57,483 - src.logger - INFO - CSV Logger initialized in directory: logs
+2025-12-06 00:37:57,483 - __main__ - INFO - Initializing execution manager...
+2025-12-06 00:37:57,491 - src.logic_a - INFO - Loaded configuration: Logic A - CG4n51_L1
+2025-12-06 00:37:57,491 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 00:37:57,492 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 00:37:57,492 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 00:37:57,492 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 00:37:57,492 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 00:37:57,493 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 00:37:57,493 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 00:37:57,493 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 00:37:57,493 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 00:37:57,493 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 00:37:57,493 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 00:37:57,494 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 00:37:57,494 - src.logic_a - INFO - Logic A initialized
+2025-12-06 00:37:57,502 - src.logic_a - INFO - Loaded configuration: Logic B - CG4n51_L2
+2025-12-06 00:37:57,502 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 00:37:57,502 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 00:37:57,503 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 00:37:57,503 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 00:37:57,503 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 00:37:57,503 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 00:37:57,503 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 00:37:57,504 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 00:37:57,504 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 00:37:57,504 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 00:37:57,504 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 00:37:57,504 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 00:37:57,504 - src.logic_a - INFO - Logic A initialized
+2025-12-06 00:37:57,504 - src.rtc_handler - INFO - RTC Handler initialized (SIMULATED - using system time)
+2025-12-06 00:37:57,505 - src.logic_b - INFO - Logic B initialized with RTC support
+2025-12-06 00:37:57,505 - src.execution_manager - INFO - Execution Manager initialized
+2025-12-06 00:37:57,505 - __main__ - INFO - Initializing web server...
+2025-12-06 00:37:57,547 - src.web_server - INFO - Web server initialized
+2025-12-06 00:37:57,547 - __main__ - INFO - System initialization complete
+2025-12-06 00:37:57,548 - __main__ - INFO - ============================================================
+2025-12-06 00:37:57,548 - __main__ - INFO - RPi Motor Control System Starting
+2025-12-06 00:37:57,548 - __main__ - INFO - Mode: SIMULATION
+2025-12-06 00:37:57,548 - __main__ - INFO - ============================================================
+2025-12-06 00:37:57,548 - __main__ - INFO - Web interface will be available at: http://0.0.0.0:5000
+2025-12-06 00:37:57,549 - src.web_server - INFO - Starting web server on 0.0.0.0:5000
+2025-12-06 00:37:57,560 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.3:5000
+2025-12-06 00:37:57,561 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-12-06 00:38:09,369 - src.execution_manager - INFO - Logic B selected
+2025-12-06 00:38:09,379 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:09] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 00:38:09,380 - src.execution_manager - INFO - Logic B selected
+2025-12-06 00:38:09,383 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:09] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 00:38:09,386 - src.execution_manager - INFO - Logic B selected
+2025-12-06 00:38:09,388 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:09] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 00:38:10,859 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:10] "GET /socket.io/?EIO=4&transport=polling&t=PhlwYJc HTTP/1.1" 200 -
+2025-12-06 00:38:10,864 - src.web_server - INFO - Client connected: hgDBEA2LRRB0Xvw-AAAB
+2025-12-06 00:38:10,867 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:10] "POST /socket.io/?EIO=4&transport=polling&t=PhlwYJk&sid=CLGDECc-THt12QjkAAAA HTTP/1.1" 200 -
+2025-12-06 00:38:10,868 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:10] "GET /socket.io/?EIO=4&transport=polling&t=PhlwYJk.0&sid=CLGDECc-THt12QjkAAAA HTTP/1.1" 200 -
+2025-12-06 00:38:13,710 - src.execution_manager - INFO - Logic A selected
+2025-12-06 00:38:13,711 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:13] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 00:38:14,356 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:14] "GET /?id=34ec648c-7c6d-4d45-b51c-a58ef9a8a73e&vscodeBrowserReqId=1764961694323 HTTP/1.1" 200 -
+2025-12-06 00:38:14,436 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:14] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-12-06 00:38:14,450 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:14] "GET /static/js/main.js HTTP/1.1" 200 -
+2025-12-06 00:38:14,459 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:14] "GET /socket.io/?EIO=4&transport=polling&t=PhlwZBs HTTP/1.1" 200 -
+2025-12-06 00:38:14,460 - src.web_server - INFO - Client disconnected: hgDBEA2LRRB0Xvw-AAAB
+2025-12-06 00:38:14,460 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:14] "GET /api/status HTTP/1.1" 200 -
+2025-12-06 00:38:14,461 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:14] "GET /socket.io/?EIO=4&transport=websocket&sid=CLGDECc-THt12QjkAAAA HTTP/1.1" 200 -
+2025-12-06 00:38:14,466 - src.web_server - INFO - Client connected: GGIODwJc4RyZJMCdAAAD
+2025-12-06 00:38:14,467 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:14] "POST /socket.io/?EIO=4&transport=polling&t=PhlwZC0&sid=922fMhkPbUHhgeB1AAAC HTTP/1.1" 200 -
+2025-12-06 00:38:14,469 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:14] "GET /socket.io/?EIO=4&transport=polling&t=PhlwZC0.0&sid=922fMhkPbUHhgeB1AAAC HTTP/1.1" 200 -
+2025-12-06 00:38:15,878 - src.execution_manager - INFO - Logic B selected
+2025-12-06 00:38:15,879 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:15] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 00:38:28,421 - src.web_server - INFO - Client disconnected: GGIODwJc4RyZJMCdAAAD
+2025-12-06 00:38:28,422 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:28] "GET /socket.io/?EIO=4&transport=websocket&sid=922fMhkPbUHhgeB1AAAC HTTP/1.1" 200 -
+2025-12-06 00:38:28,461 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:28] "GET /engineer HTTP/1.1" 200 -
+2025-12-06 00:38:28,473 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:28] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:38:32,815 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:38:32] "[31m[1mPOST /api/engineer/login HTTP/1.1[0m" 401 -
+2025-12-06 00:40:22,066 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:22] "GET /?id=34ec648c-7c6d-4d45-b51c-a58ef9a8a73e&vscodeBrowserReqId=1764961822059 HTTP/1.1" 200 -
+2025-12-06 00:40:22,076 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:22] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:40:22,077 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:22] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2025-12-06 00:40:22,083 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:22] "GET /socket.io/?EIO=4&transport=polling&t=Phlx2M0 HTTP/1.1" 200 -
+2025-12-06 00:40:22,083 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:22] "GET /api/status HTTP/1.1" 200 -
+2025-12-06 00:40:22,089 - src.web_server - INFO - Client connected: XhwENPh2MPpuYxgzAAAF
+2025-12-06 00:40:22,090 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:22] "POST /socket.io/?EIO=4&transport=polling&t=Phlx2M6&sid=JPq4dzSHyBhfLbmmAAAE HTTP/1.1" 200 -
+2025-12-06 00:40:22,092 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:22] "GET /socket.io/?EIO=4&transport=polling&t=Phlx2M7&sid=JPq4dzSHyBhfLbmmAAAE HTTP/1.1" 200 -
+2025-12-06 00:40:23,459 - src.web_server - INFO - Client disconnected: XhwENPh2MPpuYxgzAAAF
+2025-12-06 00:40:23,460 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:23] "GET /socket.io/?EIO=4&transport=websocket&sid=JPq4dzSHyBhfLbmmAAAE HTTP/1.1" 200 -
+2025-12-06 00:40:23,464 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:23] "GET /engineer HTTP/1.1" 200 -
+2025-12-06 00:40:23,480 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:23] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:40:26,463 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:26] "[31m[1mPOST /api/engineer/login HTTP/1.1[0m" 401 -
+2025-12-06 00:40:33,528 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:33] "[31m[1mPOST /api/engineer/login HTTP/1.1[0m" 401 -
+2025-12-06 00:40:47,209 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:47] "GET /?id=34ec648c-7c6d-4d45-b51c-a58ef9a8a73e&vscodeBrowserReqId=1764961847204 HTTP/1.1" 200 -
+2025-12-06 00:40:47,220 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:47] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:40:47,221 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:47] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2025-12-06 00:40:47,226 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:47] "GET /socket.io/?EIO=4&transport=polling&t=Phlx8Uu HTTP/1.1" 200 -
+2025-12-06 00:40:47,227 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:47] "GET /api/status HTTP/1.1" 200 -
+2025-12-06 00:40:47,232 - src.web_server - INFO - Client connected: 4Mb74D3750P-SL5PAAAH
+2025-12-06 00:40:47,234 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:47] "POST /socket.io/?EIO=4&transport=polling&t=Phlx8Uz&sid=8RDcoUCJR81lqH5QAAAG HTTP/1.1" 200 -
+2025-12-06 00:40:47,235 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:47] "GET /socket.io/?EIO=4&transport=polling&t=Phlx8U-&sid=8RDcoUCJR81lqH5QAAAG HTTP/1.1" 200 -
+2025-12-06 00:40:49,622 - src.web_server - INFO - Client disconnected: 4Mb74D3750P-SL5PAAAH
+2025-12-06 00:40:49,623 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:49] "GET /socket.io/?EIO=4&transport=websocket&sid=8RDcoUCJR81lqH5QAAAG HTTP/1.1" 200 -
+2025-12-06 00:40:49,627 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:49] "GET /engineer HTTP/1.1" 200 -
+2025-12-06 00:40:49,637 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:49] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:40:52,218 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:40:52] "[31m[1mPOST /api/engineer/login HTTP/1.1[0m" 401 -
+2025-12-06 00:41:18,924 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:18] "GET /?id=34ec648c-7c6d-4d45-b51c-a58ef9a8a73e&vscodeBrowserReqId=1764961878916 HTTP/1.1" 200 -
+2025-12-06 00:41:18,935 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:18] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:41:18,936 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:18] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2025-12-06 00:41:18,941 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:18] "GET /socket.io/?EIO=4&transport=polling&t=PhlxGEQ HTTP/1.1" 200 -
+2025-12-06 00:41:18,942 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:18] "GET /api/status HTTP/1.1" 200 -
+2025-12-06 00:41:18,947 - src.web_server - INFO - Client connected: lcID9nX7Akemt0RlAAAJ
+2025-12-06 00:41:18,947 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:18] "POST /socket.io/?EIO=4&transport=polling&t=PhlxGEV&sid=KEzJ8bf9oZ8m6rNEAAAI HTTP/1.1" 200 -
+2025-12-06 00:41:18,949 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:18] "GET /socket.io/?EIO=4&transport=polling&t=PhlxGEW&sid=KEzJ8bf9oZ8m6rNEAAAI HTTP/1.1" 200 -
+2025-12-06 00:41:18,955 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:18] "GET /socket.io/?EIO=4&transport=polling&t=PhlxGEe&sid=KEzJ8bf9oZ8m6rNEAAAI HTTP/1.1" 200 -
+2025-12-06 00:41:20,260 - src.web_server - INFO - Client disconnected: lcID9nX7Akemt0RlAAAJ
+2025-12-06 00:41:20,261 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:20] "GET /socket.io/?EIO=4&transport=websocket&sid=KEzJ8bf9oZ8m6rNEAAAI HTTP/1.1" 200 -
+2025-12-06 00:41:20,265 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:20] "GET /engineer HTTP/1.1" 200 -
+2025-12-06 00:41:20,290 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:20] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:41:22,576 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:22] "POST /api/engineer/login HTTP/1.1" 200 -
+2025-12-06 00:41:22,589 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:22] "GET /engineer HTTP/1.1" 200 -
+2025-12-06 00:41:22,599 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:22] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:41:27,454 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:27] "POST /api/engineer/login HTTP/1.1" 200 -
+2025-12-06 00:41:27,472 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:27] "GET /engineer HTTP/1.1" 200 -
+2025-12-06 00:41:27,482 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:27] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:41:30,043 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:30] "GET /socket.io/?EIO=4&transport=polling&t=PhlxIxu HTTP/1.1" 200 -
+2025-12-06 00:41:30,048 - src.web_server - INFO - Client connected: 9ZW78MjDBTxemeO9AAAL
+2025-12-06 00:41:30,049 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:30] "POST /socket.io/?EIO=4&transport=polling&t=PhlxIxz&sid=rPN4yyHkQobuS1ONAAAK HTTP/1.1" 200 -
+2025-12-06 00:41:30,051 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:30] "GET /socket.io/?EIO=4&transport=polling&t=PhlxIx-&sid=rPN4yyHkQobuS1ONAAAK HTTP/1.1" 200 -
+2025-12-06 00:41:31,573 - src.web_server - INFO - Client disconnected: 9ZW78MjDBTxemeO9AAAL
+2025-12-06 00:41:31,573 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:31] "GET /socket.io/?EIO=4&transport=websocket&sid=rPN4yyHkQobuS1ONAAAK HTTP/1.1" 200 -
+2025-12-06 00:41:31,616 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:31] "GET /logs HTTP/1.1" 200 -
+2025-12-06 00:41:31,627 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:31] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:41:31,641 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:31] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 00:41:36,650 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:36] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 00:41:37,576 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:37] "GET / HTTP/1.1" 200 -
+2025-12-06 00:41:37,588 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:37] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 00:41:37,588 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:37] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2025-12-06 00:41:37,594 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:37] "GET /socket.io/?EIO=4&transport=polling&t=PhlxKnt HTTP/1.1" 200 -
+2025-12-06 00:41:37,594 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:37] "GET /api/status HTTP/1.1" 200 -
+2025-12-06 00:41:37,601 - src.web_server - INFO - Client connected: -Dfd7gVwJbz_nZLcAAAN
+2025-12-06 00:41:37,602 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:37] "POST /socket.io/?EIO=4&transport=polling&t=PhlxKn_&sid=WFWlwY9m3JEd0a9LAAAM HTTP/1.1" 200 -
+2025-12-06 00:41:37,604 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:37] "GET /socket.io/?EIO=4&transport=polling&t=PhlxKn_.0&sid=WFWlwY9m3JEd0a9LAAAM HTTP/1.1" 200 -
+2025-12-06 00:41:39,232 - src.execution_manager - INFO - Logic A selected
+2025-12-06 00:41:39,233 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 00:41:39] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 00:41:40,270 - src.logic_a - INFO - Finding home position
+2025-12-06 00:42:47,214 - __main__ - INFO - Received signal 2
+2025-12-06 00:42:47,214 - __main__ - INFO - Shutting down system...
+2025-12-06 00:42:47,215 - __main__ - INFO - Stopping execution manager...
+2025-12-06 00:42:47,216 - src.execution_manager - CRITICAL - EMERGENCY STOP triggered

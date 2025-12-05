@@ -1,0 +1,45 @@
+{
+  "system": {
+    "simulation_mode": true,
+    "debug_mode": true,
+    "log_level": "INFO"
+  },
+
+  "web_server": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "secret_key": "your-secret-key-change-in-production",
+    "engineer_password": "engineer2025"
+  },
+
+  "wifi_ap": {
+    "ssid": "RPi_MotorControl",
+    "password": "motorcontrol123",
+    "ip_address": "192.168.4.1",
+    "dhcp_range": "192.168.4.2,192.168.4.20"
+  },
+
+  "logging": {
+    "operations_log": "logs/operations_{date}.csv",
+    "parameters_log": "logs/parameters_{date}.csv",
+    "errors_log": "logs/errors_{date}.csv",
+    "max_log_age_days": 30
+  },
+
+  "adc": {
+    "type": "MCP3008",
+    "spi_bus": 0,
+    "spi_device": 0,
+    "vref": 3.3,
+    "joystick_center_min": 352,
+    "joystick_center_max": 652,
+    "joystick_min": 0,
+    "joystick_max": 1023
+  },
+
+  "safety": {
+    "emergency_stop_check_interval_ms": 10,
+    "watchdog_timeout_seconds": 300,
+    "enable_watchdog": false
+  }
+}

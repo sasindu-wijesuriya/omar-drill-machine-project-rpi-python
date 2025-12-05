@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RPi Motor Control - Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🔧 RPi Motor Control System</h1>
+        <div class="header-status">
+          <span id="connection-status" class="status-badge disconnected"
+            >Disconnected</span
+          >
+          <span id="rtc-display" class="rtc-display"></span>
+        </div>
+      </header>
+
+      <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="showTab('control')">
+          Control
+        </button>
+        <button class="tab-btn" onclick="showTab('status')">Status</button>
+        <button class="tab-btn" onclick="location.href='/engineer'">
+          Engineer Menu
+        </button>
+        <button class="tab-btn" onclick="location.href='/logs'">Logs</button>
+      </nav>
+
+      <!-- Control Tab -->
+      <div id="control-tab" class="tab-content active">
+        <section class="card">
+          <h2>Logic Selection</h2>
+          <div class="logic-selector">
+            <button
+              class="logic-btn"
+              id="logic-a-btn"
+              onclick="selectLogic('A')"
+            >
+              <span class="logic-label">Logic A</span>
+              <span class="logic-desc">Standard Control</span>
+            </button>
+            <button
+              class="logic-btn"
+              id="logic-b-btn"
+              onclick="selectLogic('B')"
+            >
+              <span class="logic-label">Logic B</span>
+              <span class="logic-desc">With RTC Check</span>
+            </button>
+          </div>
+          <div class="selected-logic">
+            Selected: <span id="selected-logic-display">None</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Mode Selection</h2>
+          <div class="mode-selector">
+            <button class="mode-btn" onclick="selectMode(1)">Mode 1</button>
+            <button class="mode-btn" onclick="selectMode(2)">Mode 2</button>
+            <button class="mode-btn" onclick="selectMode(3)">Mode 3</button>
+            <button class="mode-btn" onclick="selectMode(4)">Mode 4</button>
+            <button class="mode-btn" onclick="selectMode(5)">Mode 5</button>
+          </div>
+          <div class="selected-mode">
+            Selected Mode: <span id="selected-mode-display">None</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Operation Controls</h2>
+          <div class="control-buttons">
+            <button class="btn btn-success" onclick="startExecution()">
+              ▶️ START
+            </button>
+            <button class="btn btn-warning" onclick="stopExecution()">
+              ⏸️ STOP
+            </button>
+            <button class="btn btn-danger" onclick="emergencyStop()">
+              🛑 EMERGENCY STOP
+            </button>
+          </div>
+          <div class="control-buttons">
+            <button class="btn btn-secondary" onclick="enableManual()">
+              🕹️ Manual Mode
+            </button>
+            <button class="btn btn-secondary" onclick="disableManual()">
+              🤖 Auto Mode
+            </button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Current Status</h2>
+          <div class="status-grid">
+            <div class="status-item">
+              <span class="status-label">Active Logic:</span>
+              <span id="active-logic" class="status-value">-</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Mode:</span>
+              <span id="current-mode" class="status-value">-</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Phase:</span>
+              <span id="current-phase" class="status-value">-</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Position:</span>
+              <span id="current-position" class="status-value">-</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Cycle Count:</span>
+              <span id="cycle-count" class="status-value">0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Running:</span>
+              <span id="running-status" class="status-value">No</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Status Tab -->
+      <div id="status-tab" class="tab-content">
+        <section class="card">
+          <h2>System Information</h2>
+          <pre id="system-info" class="info-display">Loading...</pre>
+        </section>
+
+        <section class="card">
+          <h2>RTC Information (Logic B)</h2>
+          <pre id="rtc-info" class="info-display">
+Select Logic B to view RTC info</pre
+          >
+        </section>
+
+        <section class="card">
+          <h2>Recent Operations</h2>
+          <div id="recent-operations" class="operations-list">Loading...</div>
+        </section>
+      </div>
+
+      <footer>
+        <p>RPi Motor Control System v1.0 | Omar Project 2025</p>
+      </footer>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>
