@@ -12,12 +12,28 @@ logger = logging.getLogger(__name__)
 # Simulator configuration
 SIMULATOR_URL = "http://localhost:8100"
 
-# pigpio constants
+# pigpio constants - GPIO Modes
 INPUT = 0
 OUTPUT = 1
+ALT0 = 4
+ALT1 = 5
+ALT2 = 6
+ALT3 = 7
+ALT4 = 3
+ALT5 = 2
+
+# Pull-up/Pull-down constants
 PUD_OFF = 0
 PUD_UP = 1
 PUD_DOWN = 2
+
+# Edge detection constants
+RISING_EDGE = 0
+FALLING_EDGE = 1
+EITHER_EDGE = 2
+
+# Other constants
+TIMEOUT = 2
 
 
 class pi:
@@ -29,6 +45,9 @@ class pi:
         self.port = port
         self._connected = False
         self._start_time = time.time()
+        self._read_cache = {}  # Cache for read values
+        self._cache_time = {}  # Timestamps for cache invalidation
+        self._cache_ttl = 0.01  # 10ms cache TTL
         
         # Try to connect to simulator
         try:
@@ -58,7 +77,7 @@ class pi:
             response = requests.post(
                 f"{SIMULATOR_URL}/api/pin/{pin}/mode",
                 json={"mode": mode_str},
-                timeout=1
+                timeout=0.2  # Shorter timeout
             )
             if response.status_code == 200:
                 logger.debug(f"Pin {pin} mode set to {mode_str}")
@@ -76,7 +95,7 @@ class pi:
             response = requests.post(
                 f"{SIMULATOR_URL}/api/pin/{pin}/pull",
                 json={"pull": pud_str},
-                timeout=1
+                timeout=0.2  # Shorter timeout
             )
             if response.status_code == 200:
                 logger.debug(f"Pin {pin} pull resistor set to {pud_str}")
@@ -86,21 +105,32 @@ class pi:
             logger.error(f"Error setting pin {pin} pull resistor: {e}")
     
     def read(self, pin: int) -> int:
-        """Read digital pin value"""
+        """Read digital pin value (with caching to avoid HTTP flooding)"""
+        current_time = time.time()
+        
+        # Check cache
+        if pin in self._read_cache:
+            if current_time - self._cache_time[pin] < self._cache_ttl:
+                return self._read_cache[pin]
+        
+        # Cache miss or expired - fetch from simulator
         try:
             response = requests.get(
                 f"{SIMULATOR_URL}/api/pin/{pin}/value",
-                timeout=1
+                timeout=0.05  # Much shorter timeout (50ms)
             )
             if response.status_code == 200:
                 data = response.json()
-                return data.get('value', 0)
+                value = data.get('value', 0)
+                self._read_cache[pin] = value
+                self._cache_time[pin] = current_time
+                return value
             else:
                 logger.warning(f"Failed to read pin {pin}")
-                return 0
+                return self._read_cache.get(pin, 0)  # Return cached value on error
         except Exception as e:
-            logger.error(f"Error reading pin {pin}: {e}")
-            return 0
+            logger.debug(f"Error reading pin {pin}: {e}")
+            return self._read_cache.get(pin, 0)  # Return cached value on error
     
     def write(self, pin: int, value: int):
         """Write digital pin value"""
@@ -108,12 +138,13 @@ class pi:
             response = requests.post(
                 f"{SIMULATOR_URL}/api/pin/{pin}/value",
                 json={"value": value},
-                timeout=1
+                timeout=0.05  # Shorter timeout (50ms)
             )
             if response.status_code != 200:
                 logger.warning(f"Failed to write pin {pin}")
         except Exception as e:
-            logger.error(f"Error writing pin {pin}: {e}")
+            # Don't log every write error in tight loops
+            pass
     
     def hardware_PWM(self, pin: int, frequency: int, dutycycle: int):
         """Simulate hardware PWM (logged but not fully simulated)"""

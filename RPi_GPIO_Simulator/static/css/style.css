@@ -441,6 +441,22 @@ h1 {
   border-color: var(--output);
 }
 
+.led-indicator.pulsing {
+  animation: pulse-glow 0.3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 12px var(--output);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 20px var(--output), 0 0 30px var(--output);
+    opacity: 0.7;
+  }
+}
+
 .pin-value {
   font-family: monospace;
   font-weight: bold;

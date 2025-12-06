@@ -214,11 +214,38 @@ async function fetchPins() {
     const response = await fetch("/api/pins");
     const data = await response.json();
     pinsState = data.pins;
+
+    // Handle pulse activity
+    if (data.pulse_activity) {
+      updatePulseActivity(data.pulse_activity);
+    }
+
     updateUI();
   } catch (error) {
     console.error("Error fetching pins:", error);
     addLog("Error fetching pin states", "error");
   }
+}
+
+// Update pulse activity indicators
+function updatePulseActivity(pulseActivity) {
+  Object.keys(pulseActivity).forEach((pin) => {
+    const activity = pulseActivity[pin];
+    const ledIndicator = document.querySelector(
+      `.led-indicator[data-pin="${pin}"]`
+    );
+
+    if (ledIndicator) {
+      if (activity.active) {
+        // Add pulsing animation
+        ledIndicator.classList.add("active", "pulsing");
+        addLog(`Pin ${pin} is pulsing (${activity.count} pulses)`, "info");
+      } else {
+        // Remove pulsing animation if inactive
+        ledIndicator.classList.remove("pulsing");
+      }
+    }
+  });
 }
 
 // Toggle pin (for INPUT pins in the grid)

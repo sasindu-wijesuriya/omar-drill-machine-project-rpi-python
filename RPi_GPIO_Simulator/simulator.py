@@ -30,8 +30,15 @@ class GPIOSimulator:
         # Pin states: {pin_number: {'mode': 'INPUT'|'OUTPUT', 'value': 0|1, 'pull': 'OFF'|'UP'|'DOWN'}}
         self.pins = {}
         
+        # Track pulse activity for PWM pins
+        self.pulse_activity = {}  # {pin: last_activity_timestamp}
+        self.pulse_counts = {}  # {pin: pulse_count}
+        
         # Pin configurations from the RPi_Motor_Control project
         self.pin_configs = {
+            # Status indicators (OUTPUT)
+            2: {'name': 'manualMode', 'type': 'STATUS_LED', 'default_mode': 'OUTPUT'},
+            
             # Motor pins (OUTPUT)
             18: {'name': 'pulsos1', 'type': 'MOTOR_PWM', 'default_mode': 'OUTPUT'},
             23: {'name': 'dir1', 'type': 'MOTOR_DIR', 'default_mode': 'OUTPUT'},
@@ -59,6 +66,9 @@ class GPIOSimulator:
                 'name': config['name'],
                 'type': config['type']
             }
+            if config['type'] == 'MOTOR_PWM':
+                self.pulse_activity[pin] = 0
+                self.pulse_counts[pin] = 0
         
         logger.info(f"GPIO Simulator initialized with {len(self.pins)} pins")
     
@@ -96,13 +106,26 @@ class GPIOSimulator:
         """Write pin value"""
         with self.lock:
             if pin in self.pins:
+                old_value = self.pins[pin]['value']
                 self.pins[pin]['value'] = value
-                # Emit change via websocket
-                socketio.emit('pin_changed', {
-                    'pin': pin,
-                    'value': value,
-                    'timestamp': time.time()
-                })
+                
+                # Track pulse activity for PWM pins
+                pin_type = self.pins[pin].get('type', 'GENERIC')
+                
+                if pin_type == 'MOTOR_PWM':
+                    # Track pulse activity
+                    self.pulse_activity[pin] = time.time()
+                    if old_value == 0 and value == 1:
+                        # Rising edge = one pulse
+                        self.pulse_counts[pin] = self.pulse_counts.get(pin, 0) + 1
+                else:
+                    # For non-PWM pins (buttons, direction, etc), always emit
+                    socketio.emit('pin_changed', {
+                        'pin': pin,
+                        'value': value,
+                        'timestamp': time.time()
+                    })
+                
                 return True
             return False
     
@@ -159,6 +182,10 @@ class GPIOSimulator:
                     'name': config['name'],
                     'type': config['type']
                 }
+            # Clear pulse tracking
+            for pin in self.pulse_activity.keys():
+                self.pulse_activity[pin] = 0
+                self.pulse_counts[pin] = 0
             logger.info("GPIO Simulator reset to default state")
             socketio.emit('simulator_reset', {'timestamp': time.time()})
 
@@ -177,8 +204,24 @@ def index():
 @app.route('/api/pins', methods=['GET'])
 def get_pins():
     """Get all pin states"""
+    # Include pulse activity info
+    pins_data = gpio_sim.get_all_pins()
+    pulse_info = {}
+    
+    current_time = time.time()
+    for pin in [18, 24]:  # PWM pins
+        if pin in gpio_sim.pulse_activity:
+            last_activity = gpio_sim.pulse_activity[pin]
+            is_active = (current_time - last_activity) < 0.5  # Active if pulsed in last 0.5s
+            pulse_info[pin] = {
+                'active': is_active,
+                'count': gpio_sim.pulse_counts.get(pin, 0),
+                'last_activity': last_activity
+            }
+    
     return jsonify({
-        'pins': gpio_sim.get_all_pins(),
+        'pins': pins_data,
+        'pulse_activity': pulse_info,
         'timestamp': time.time()
     })
 
@@ -248,8 +291,16 @@ def pin_value(pin):
         if pin not in pins:
             return jsonify({'error': 'Pin not found'}), 404
         
-        # Only allow setting input pins manually
-        if pins[pin]['mode'] == 'INPUT':
+        # Allow writing to OUTPUT pins from the motor controller
+        if pins[pin]['mode'] == 'OUTPUT':
+            gpio_sim.write(pin, value)
+            return jsonify({
+                'success': True,
+                'pin': pin,
+                'value': value
+            })
+        # Allow setting INPUT pins manually for testing
+        elif pins[pin]['mode'] == 'INPUT':
             gpio_sim.set_input_value(pin, value)
             return jsonify({
                 'success': True,
@@ -257,7 +308,7 @@ def pin_value(pin):
                 'value': value
             })
         else:
-            return jsonify({'error': 'Can only manually set INPUT pins'}), 400
+            return jsonify({'error': 'Invalid pin mode'}), 400
 
 
 @app.route('/api/pin/<int:pin>/toggle', methods=['POST'])
@@ -293,6 +344,14 @@ def reset_simulator():
 def handle_connect():
     """Handle client connection"""
     logger.info('Client connected')
+    
+    # Clear pulse tracking to avoid overwhelming the client with old data
+    with gpio_sim.lock:
+        for pin in gpio_sim.pulse_activity.keys():
+            gpio_sim.pulse_activity[pin] = 0
+            gpio_sim.pulse_counts[pin] = 0
+    
+    # Send only current state, not history
     emit('connected', {
         'message': 'Connected to GPIO Simulator',
         'pins': gpio_sim.get_all_pins()
