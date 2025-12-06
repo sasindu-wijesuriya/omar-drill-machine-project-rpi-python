@@ -105,6 +105,35 @@ function updateStatus(data) {
       ? "Yes"
       : "No";
 
+    // Update manual mode indicator
+    const manualModeIndicator = document.getElementById(
+      "manual-mode-indicator"
+    );
+    const manualModeBtn = document.getElementById("manual-mode-btn");
+    const autoModeBtn = document.getElementById("auto-mode-btn");
+
+    if (logicStatus.manual_mode) {
+      manualModeIndicator.style.display = "block";
+      if (manualModeBtn) {
+        manualModeBtn.classList.add("btn-active");
+        manualModeBtn.disabled = true;
+      }
+      if (autoModeBtn) {
+        autoModeBtn.classList.remove("btn-active");
+        autoModeBtn.disabled = false;
+      }
+    } else {
+      manualModeIndicator.style.display = "none";
+      if (manualModeBtn) {
+        manualModeBtn.classList.remove("btn-active");
+        manualModeBtn.disabled = false;
+      }
+      if (autoModeBtn) {
+        autoModeBtn.classList.add("btn-active");
+        autoModeBtn.disabled = true;
+      }
+    }
+
     if (logicStatus.selected_mode) {
       selectedMode = logicStatus.selected_mode;
       document.getElementById("selected-mode-display").textContent =

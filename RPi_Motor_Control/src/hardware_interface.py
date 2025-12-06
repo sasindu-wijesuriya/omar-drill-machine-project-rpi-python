@@ -257,17 +257,18 @@ def get_hardware_interface(simulate: bool = False) -> HardwareInterface:
     Returns:
         HardwareInterface instance (Real or Simulated)
     """
-    if simulate:
-        logger.info("Using SIMULATED hardware interface")
-        return SimulatedHardwareInterface(simulate=True)
-    else:
-        try:
-            logger.info("Attempting to use REAL hardware interface (pigpio)")
-            return RealHardwareInterface(simulate=False)
-        except (ImportError, RuntimeError) as e:
-            logger.warning(f"Could not initialize real hardware: {e}")
+    # Always try to use pigpio first (could be real or mock)
+    try:
+        logger.info("Attempting to use pigpio interface (real or mock)")
+        return RealHardwareInterface(simulate=False)
+    except (ImportError, RuntimeError) as e:
+        if simulate:
+            logger.warning(f"Could not initialize pigpio: {e}")
             logger.warning("Falling back to SIMULATED hardware interface")
             return SimulatedHardwareInterface(simulate=True)
+        else:
+            # If not simulating and can't get real hardware, raise error
+            raise RuntimeError(f"Failed to initialize real hardware: {e}")
 
 
 # For convenience

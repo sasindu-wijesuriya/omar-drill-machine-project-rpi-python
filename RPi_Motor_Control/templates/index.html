@@ -48,6 +48,13 @@
                   >Please select a logic to begin</span
                 >
               </div>
+              <div
+                class="manual-mode-indicator"
+                id="manual-mode-indicator"
+                style="display: none"
+              >
+                <span class="badge badge-manual">🕹️ MANUAL MODE ACTIVE</span>
+              </div>
             </div>
             <button
               class="btn btn-primary btn-change-logic"
@@ -107,11 +114,19 @@
             </button>
           </div>
           <div class="control-buttons">
-            <button class="btn btn-secondary" onclick="enableManual()">
-              🕹️ Manual Mode
+            <button
+              class="btn btn-secondary"
+              id="manual-mode-btn"
+              onclick="enableManual()"
+            >
+              🕹️ Enable Manual Mode
             </button>
-            <button class="btn btn-secondary" onclick="disableManual()">
-              🤖 Auto Mode
+            <button
+              class="btn btn-secondary"
+              id="auto-mode-btn"
+              onclick="disableManual()"
+            >
+              🤖 Enable Auto Mode
             </button>
           </div>
         </section>

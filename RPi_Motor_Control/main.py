@@ -95,7 +95,7 @@ class MotorControlSystem:
             logger.warning("Using default configuration")
             return {
                 'system': {'simulation_mode': False, 'debug_mode': False},
-                'web_server': {'host': '0.0.0.0', 'port': 5000, 'engineer_password': 'engineer2025'},
+                'web_server': {'host': '0.0.0.0', 'port': 5000, 'engineer_password': '1234'},
                 'logging': {'operations_log': 'logs/operations_{date}.csv'}
             }
     

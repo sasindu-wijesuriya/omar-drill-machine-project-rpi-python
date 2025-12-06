@@ -9,7 +9,7 @@
     "host": "0.0.0.0",
     "port": 5000,
     "secret_key": "your-secret-key-change-in-production",
-    "engineer_password": "engineer2025"
+    "engineer_password": "1234"
   },
 
   "wifi_ap": {

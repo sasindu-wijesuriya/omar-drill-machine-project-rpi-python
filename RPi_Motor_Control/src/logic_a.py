@@ -128,6 +128,10 @@ class LogicA:
         
         self.motor_linear.set_direction(sentido_lineal)
         self.motor_drill.set_direction(sentido_taladro)
+        
+        # Manual mode indicator (GPIO 2)
+        self.manual_mode_pin = 2
+        self.hw.set_mode_output(self.manual_mode_pin, initial_value=0)
     
     def _init_inputs(self):
         """Initialize buttons, limit switches, and joystick"""
@@ -220,7 +224,17 @@ class LogicA:
         if not self.en_ejecucion and not self.en_espera:
             self.modo_manual = True
             self.mode = OperationMode.MANUAL
-            logger.info("Manual mode enabled")
+            
+            # Set GPIO 2 HIGH to indicate manual mode
+            self.hw.write(self.manual_mode_pin, 1)
+            
+            logger.info("="*60)
+            logger.info("MANUAL MODE ENABLED")
+            logger.info("Manual control is now active")
+            logger.info(f"GPIO {self.manual_mode_pin} set HIGH")
+            logger.info("="*60)
+            
+            self.csv_logger.log_operation("A", "Manual", "ModeEnabled", "Active")
             self._update_status()
     
     def disable_manual_mode(self):
@@ -229,7 +243,17 @@ class LogicA:
         self.motor_linear.stop()
         self.motor_drill.stop()
         self.mode = OperationMode.IDLE
-        logger.info("Manual mode disabled")
+        
+        # Set GPIO 2 LOW when exiting manual mode
+        self.hw.write(self.manual_mode_pin, 0)
+        
+        logger.info("="*60)
+        logger.info("MANUAL MODE DISABLED")
+        logger.info("Returned to automatic mode")
+        logger.info(f"GPIO {self.manual_mode_pin} set LOW")
+        logger.info("="*60)
+        
+        self.csv_logger.log_operation("A", "Manual", "ModeDisabled", "Inactive")
         self._update_status()
     
     def _main_loop(self):
