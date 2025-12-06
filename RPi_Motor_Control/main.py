@@ -8,7 +8,21 @@ import signal
 import logging
 import argparse
 import json
+import os
 from pathlib import Path
+
+# Add GPIO Simulator mock library to path (for local testing on Windows/Mac)
+simulator_path = os.path.join(os.path.dirname(__file__), '..', 'RPi_GPIO_Simulator', 'mock_gpio')
+if os.path.exists(simulator_path):
+    sys.path.insert(0, simulator_path)
+    print("=" * 70)
+    print("✓ GPIO SIMULATOR MODE ENABLED")
+    print(f"  Mock library path: {simulator_path}")
+    print(f"  Simulator should be running on: http://localhost:8100")
+    print("=" * 70)
+else:
+    print(f"⚠ GPIO Simulator not found at: {simulator_path}")
+    print(f"  Will use built-in simulation mode or real hardware")
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))

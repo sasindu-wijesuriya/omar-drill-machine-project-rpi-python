@@ -546,3 +546,294 @@ jinja2.exceptions.TemplateNotFound: logs.html
 2025-12-06 00:42:47,214 - __main__ - INFO - Shutting down system...
 2025-12-06 00:42:47,215 - __main__ - INFO - Stopping execution manager...
 2025-12-06 00:42:47,216 - src.execution_manager - CRITICAL - EMERGENCY STOP triggered
+2025-12-06 16:33:25,632 - __main__ - INFO - Loaded system configuration from F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\config\system_config.json
+2025-12-06 16:33:25,674 - __main__ - INFO - Starting Motor Control System (simulate=True)
+2025-12-06 16:33:25,675 - __main__ - INFO - Initializing system components...
+2025-12-06 16:33:25,675 - __main__ - INFO - Initializing hardware interface...
+2025-12-06 16:33:25,675 - src.hardware_interface - INFO - Using SIMULATED hardware interface
+2025-12-06 16:33:25,675 - src.hardware_interface - INFO - Initializing SIMULATED GPIO interface
+2025-12-06 16:33:25,676 - src.hardware_interface - INFO - Simulated GPIO initialized - Use this for development only!
+2025-12-06 16:33:25,676 - __main__ - INFO - Initializing CSV logger...
+2025-12-06 16:33:25,677 - src.logger - INFO - CSV Logger initialized in directory: logs
+2025-12-06 16:33:25,678 - __main__ - INFO - Initializing execution manager...
+2025-12-06 16:33:25,678 - src.logic_a - INFO - Loaded configuration: Logic A - CG4n51_L1
+2025-12-06 16:33:25,679 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 16:33:25,679 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 16:33:25,680 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 16:33:25,680 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 16:33:25,680 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 16:33:25,680 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 16:33:25,681 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 16:33:25,681 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 16:33:25,681 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 16:33:25,681 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 16:33:25,682 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 16:33:25,682 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 16:33:25,682 - src.logic_a - INFO - Logic A initialized
+2025-12-06 16:33:25,683 - src.logic_a - INFO - Loaded configuration: Logic B - CG4n51_L2
+2025-12-06 16:33:25,683 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 16:33:25,684 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 16:33:25,684 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 16:33:25,685 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 16:33:25,685 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 16:33:25,685 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 16:33:25,685 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 16:33:25,685 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 16:33:25,685 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 16:33:25,686 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 16:33:25,686 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 16:33:25,686 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 16:33:25,686 - src.logic_a - INFO - Logic A initialized
+2025-12-06 16:33:25,687 - src.rtc_handler - INFO - RTC Handler initialized (SIMULATED - using system time)
+2025-12-06 16:33:25,687 - src.logic_b - INFO - Logic B initialized with RTC support
+2025-12-06 16:33:25,687 - src.execution_manager - INFO - Execution Manager initialized
+2025-12-06 16:33:25,688 - __main__ - INFO - Initializing web server...
+2025-12-06 16:33:25,773 - src.web_server - INFO - Web server initialized
+2025-12-06 16:33:25,773 - __main__ - INFO - System initialization complete
+2025-12-06 16:33:25,774 - __main__ - INFO - ============================================================
+2025-12-06 16:33:25,774 - __main__ - INFO - RPi Motor Control System Starting
+2025-12-06 16:33:25,774 - __main__ - INFO - Mode: SIMULATION
+2025-12-06 16:33:25,774 - __main__ - INFO - ============================================================
+2025-12-06 16:33:25,775 - __main__ - INFO - Web interface will be available at: http://0.0.0.0:5000
+2025-12-06 16:33:25,775 - src.web_server - INFO - Starting web server on 0.0.0.0:5000
+2025-12-06 16:33:25,795 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.43.62:5000
+2025-12-06 16:33:25,796 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-12-06 16:33:42,101 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:33:42] "GET / HTTP/1.1" 200 -
+2025-12-06 16:33:42,292 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:33:42] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-12-06 16:33:42,299 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:33:42] "GET /static/js/main.js HTTP/1.1" 200 -
+2025-12-06 16:33:56,806 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:33:56] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-12-06 16:37:19,888 - src.execution_manager - INFO - Logic A selected
+2025-12-06 16:37:21,596 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:37:21] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 16:37:21,830 - src.execution_manager - INFO - Logic A selected
+2025-12-06 16:37:21,831 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:37:21] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 16:37:30,026 - src.logic_a - INFO - Finding home position
+2025-12-06 16:42:54,583 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:42:54] "GET /engineer HTTP/1.1" 200 -
+2025-12-06 16:42:54,642 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:42:54] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 16:44:12,572 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:12] "GET /logs HTTP/1.1" 200 -
+2025-12-06 16:44:12,631 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:12] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 16:44:12,654 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:12] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:44:17,661 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:17] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:44:22,662 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:22] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:44:27,665 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:27] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:44:32,662 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:32] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:44:37,663 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:37] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:44:42,664 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:42] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:44:47,665 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:47] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:44:52,659 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:52] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:44:57,662 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:44:57] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:02,667 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:02] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:07,660 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:07] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:12,666 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:12] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:17,659 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:17] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:22,655 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:22] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:27,658 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:27] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:32,654 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:32] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:37,666 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:37] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:42,667 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:42] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:47,659 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:47] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:52,661 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:52] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:45:57,668 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:45:57] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:46:02,667 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:02] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:46:07,665 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:07] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:46:12,657 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:12] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:46:13,960 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:13] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:46:15,039 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:15] "GET /api/logs/operations?lines=100 HTTP/1.1" 200 -
+2025-12-06 16:46:16,814 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:16] "GET / HTTP/1.1" 200 -
+2025-12-06 16:46:16,875 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:16] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 16:46:16,896 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:16] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2025-12-06 16:46:24,051 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:24] "GET /engineer HTTP/1.1" 200 -
+2025-12-06 16:46:24,109 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:24] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 16:46:26,195 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:26] "GET / HTTP/1.1" 200 -
+2025-12-06 16:46:26,241 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:26] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 16:46:26,252 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 16:46:26] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2025-12-06 17:42:50,773 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:50] "GET / HTTP/1.1" 200 -
+2025-12-06 17:42:50,835 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:50] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-12-06 17:42:50,869 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:50] "GET /static/js/main.js HTTP/1.1" 200 -
+2025-12-06 17:42:51,293 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:51] "GET /socket.io/?EIO=4&transport=polling&t=Phpb4BE HTTP/1.1" 200 -
+2025-12-06 17:42:51,356 - src.web_server - INFO - Client connected: km6q7tP5AYf3ZP5EAAAB
+2025-12-06 17:42:51,367 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:51] "GET /socket.io/?EIO=4&transport=polling&t=Phpb4C7&sid=qw2VxUq1Ll74zgByAAAA HTTP/1.1" 200 -
+2025-12-06 17:42:54,554 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:54] "GET / HTTP/1.1" 200 -
+2025-12-06 17:42:54,567 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:54] "GET /socket.io/?EIO=4&transport=websocket&sid=qw2VxUq1Ll74zgByAAAA HTTP/1.1" 200 -
+2025-12-06 17:42:54,599 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:54] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 17:42:54,616 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:54] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2025-12-06 17:42:54,651 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:54] "GET /socket.io/?EIO=4&transport=polling&t=Phpb4_o HTTP/1.1" 200 -
+2025-12-06 17:42:54,670 - src.web_server - INFO - Client connected: o0vS6d5sikWRyJh2AAAD
+2025-12-06 17:42:54,682 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:42:54] "GET /socket.io/?EIO=4&transport=polling&t=Phpb505&sid=ACq1s2J2vY8rH-w3AAAC HTTP/1.1" 200 -
+2025-12-06 17:43:05,982 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:05] "GET / HTTP/1.1" 200 -
+2025-12-06 17:43:05,991 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:05] "GET /socket.io/?EIO=4&transport=websocket&sid=ACq1s2J2vY8rH-w3AAAC HTTP/1.1" 200 -
+2025-12-06 17:43:06,024 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:06] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 17:43:06,031 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:06] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2025-12-06 17:43:06,059 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:06] "GET /socket.io/?EIO=4&transport=polling&t=Phpb7o1 HTTP/1.1" 200 -
+2025-12-06 17:43:06,082 - src.web_server - INFO - Client connected: JNlj_Rf018iZR1FvAAAF
+2025-12-06 17:43:06,093 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:06] "GET /socket.io/?EIO=4&transport=polling&t=Phpb7oP&sid=Hp8vuj1Ftalzx-SIAAAE HTTP/1.1" 200 -
+2025-12-06 17:43:07,944 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:07] "GET /socket.io/?EIO=4&transport=websocket&sid=Hp8vuj1Ftalzx-SIAAAE HTTP/1.1" 200 -
+2025-12-06 17:43:11,163 - __main__ - INFO - Received signal 2
+2025-12-06 17:43:11,164 - __main__ - INFO - Shutting down system...
+2025-12-06 17:43:11,165 - __main__ - INFO - Stopping execution manager...
+2025-12-06 17:43:11,166 - src.execution_manager - CRITICAL - EMERGENCY STOP triggered
+2025-12-06 17:43:26,462 - __main__ - INFO - Loaded system configuration from F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\config\system_config.json
+2025-12-06 17:43:26,462 - __main__ - INFO - Starting Motor Control System (simulate=True)
+2025-12-06 17:43:26,463 - __main__ - INFO - Initializing system components...
+2025-12-06 17:43:26,463 - __main__ - INFO - Initializing hardware interface...
+2025-12-06 17:43:26,463 - src.hardware_interface - INFO - Using SIMULATED hardware interface
+2025-12-06 17:43:26,463 - src.hardware_interface - INFO - Initializing SIMULATED GPIO interface
+2025-12-06 17:43:26,463 - src.hardware_interface - INFO - Simulated GPIO initialized - Use this for development only!
+2025-12-06 17:43:26,464 - __main__ - INFO - Initializing CSV logger...
+2025-12-06 17:43:26,464 - src.logger - INFO - CSV Logger initialized in directory: logs
+2025-12-06 17:43:26,464 - __main__ - INFO - Initializing execution manager...
+2025-12-06 17:43:26,466 - src.logic_a - INFO - Loaded configuration: Logic A - CG4n51_L1
+2025-12-06 17:43:26,466 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 17:43:26,466 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 17:43:26,466 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 17:43:26,467 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 17:43:26,467 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 17:43:26,467 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 17:43:26,467 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 17:43:26,467 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 17:43:26,468 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 17:43:26,468 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 17:43:26,468 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 17:43:26,468 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 17:43:26,468 - src.logic_a - INFO - Logic A initialized
+2025-12-06 17:43:26,470 - src.logic_a - INFO - Loaded configuration: Logic B - CG4n51_L2
+2025-12-06 17:43:26,470 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 17:43:26,470 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 17:43:26,470 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 17:43:26,470 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 17:43:26,471 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 17:43:26,471 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 17:43:26,471 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 17:43:26,471 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 17:43:26,471 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 17:43:26,472 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 17:43:26,472 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 17:43:26,472 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 17:43:26,472 - src.logic_a - INFO - Logic A initialized
+2025-12-06 17:43:26,472 - src.rtc_handler - INFO - RTC Handler initialized (SIMULATED - using system time)
+2025-12-06 17:43:26,473 - src.logic_b - INFO - Logic B initialized with RTC support
+2025-12-06 17:43:26,473 - src.execution_manager - INFO - Execution Manager initialized
+2025-12-06 17:43:26,473 - __main__ - INFO - Initializing web server...
+2025-12-06 17:43:26,530 - src.web_server - INFO - Web server initialized
+2025-12-06 17:43:26,530 - __main__ - INFO - System initialization complete
+2025-12-06 17:43:26,531 - __main__ - INFO - ============================================================
+2025-12-06 17:43:26,532 - __main__ - INFO - RPi Motor Control System Starting
+2025-12-06 17:43:26,533 - __main__ - INFO - Mode: SIMULATION
+2025-12-06 17:43:26,533 - __main__ - INFO - ============================================================
+2025-12-06 17:43:26,533 - __main__ - INFO - Web interface will be available at: http://0.0.0.0:5000
+2025-12-06 17:43:26,533 - src.web_server - INFO - Starting web server on 0.0.0.0:5000
+2025-12-06 17:43:26,550 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.43.62:5000
+2025-12-06 17:43:26,550 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-12-06 17:43:30,147 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:30] "GET / HTTP/1.1" 200 -
+2025-12-06 17:43:30,301 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:30] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-06 17:43:30,307 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:30] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2025-12-06 17:43:30,405 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:30] "GET /socket.io/?EIO=4&transport=polling&t=PhpbDkQ HTTP/1.1" 200 -
+2025-12-06 17:43:30,415 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:30] "GET /api/status HTTP/1.1" 200 -
+2025-12-06 17:43:30,479 - src.web_server - INFO - Client connected: KEk-piezCz121qq3AAAB
+2025-12-06 17:43:30,480 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:30] "POST /socket.io/?EIO=4&transport=polling&t=PhpbDla&sid=LKdwQ-l0Fyvycy4pAAAA HTTP/1.1" 200 -
+2025-12-06 17:43:30,492 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:30] "GET /socket.io/?EIO=4&transport=polling&t=PhpbDlb&sid=LKdwQ-l0Fyvycy4pAAAA HTTP/1.1" 200 -
+2025-12-06 17:43:52,434 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:52] "POST /api/engineer/login HTTP/1.1" 200 -
+2025-12-06 17:43:52,446 - src.execution_manager - INFO - Logic B selected
+2025-12-06 17:43:52,448 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:52] "POST /api/select_logic HTTP/1.1" 200 -
+2025-12-06 17:43:52,465 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 17:43:52] "POST /api/engineer/logout HTTP/1.1" 200 -
+2025-12-06 17:44:03,349 - src.logic_a - INFO - Finding home position
+2025-12-06 17:44:24,362 - __main__ - INFO - Received signal 2
+2025-12-06 17:44:24,363 - __main__ - INFO - Shutting down system...
+2025-12-06 17:44:24,363 - __main__ - INFO - Stopping execution manager...
+2025-12-06 17:44:24,364 - src.execution_manager - CRITICAL - EMERGENCY STOP triggered
+2025-12-06 18:22:33,918 - __main__ - INFO - Loaded system configuration from F:\Downloads\Omar Project Python RPi\RPi_Motor_Control\config\system_config.json
+2025-12-06 18:22:33,918 - __main__ - INFO - Starting Motor Control System (simulate=True)
+2025-12-06 18:22:33,919 - __main__ - INFO - Initializing system components...
+2025-12-06 18:22:33,919 - __main__ - INFO - Initializing hardware interface...
+2025-12-06 18:22:33,919 - src.hardware_interface - INFO - Using SIMULATED hardware interface
+2025-12-06 18:22:33,919 - src.hardware_interface - INFO - Initializing SIMULATED GPIO interface
+2025-12-06 18:22:33,919 - src.hardware_interface - INFO - Simulated GPIO initialized - Use this for development only!
+2025-12-06 18:22:33,919 - __main__ - INFO - Initializing CSV logger...
+2025-12-06 18:22:33,920 - src.logger - INFO - CSV Logger initialized in directory: logs
+2025-12-06 18:22:33,920 - __main__ - INFO - Initializing execution manager...
+2025-12-06 18:22:33,920 - src.logic_a - INFO - Loaded configuration: Logic A - CG4n51_L1
+2025-12-06 18:22:33,921 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 18:22:33,921 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 18:22:33,921 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 18:22:33,921 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 18:22:33,921 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 18:22:33,922 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 18:22:33,922 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 18:22:33,922 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 18:22:33,922 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 18:22:33,922 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 18:22:33,922 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 18:22:33,923 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 18:22:33,923 - src.logic_a - INFO - Logic A initialized
+2025-12-06 18:22:33,923 - src.logic_a - INFO - Loaded configuration: Logic B - CG4n51_L2
+2025-12-06 18:22:33,923 - src.motor_controller - INFO - StepperMotor 'Linear' initialized: STEP=18, DIR=23
+2025-12-06 18:22:33,924 - src.motor_controller - INFO - StepperMotor 'Drill' initialized: STEP=24, DIR=25
+2025-12-06 18:22:33,924 - src.motor_controller - INFO - NonBlockingStepper 'LinearNB' initialized
+2025-12-06 18:22:33,924 - src.motor_controller - INFO - NonBlockingStepper 'DrillNB' initialized
+2025-12-06 18:22:33,924 - src.motor_controller - INFO - Button 'Reset/Home' initialized on pin 17
+2025-12-06 18:22:33,924 - src.motor_controller - INFO - Button 'Start' initialized on pin 27
+2025-12-06 18:22:33,924 - src.motor_controller - INFO - Button 'Stop' initialized on pin 22
+2025-12-06 18:22:33,924 - src.motor_controller - INFO - Button 'Tala/Drill' initialized on pin 5
+2025-12-06 18:22:33,925 - src.motor_controller - INFO - LimitSwitch 'Home' initialized on pin 13
+2025-12-06 18:22:33,925 - src.motor_controller - INFO - LimitSwitch 'Final' initialized on pin 19
+2025-12-06 18:22:33,925 - src.motor_controller - INFO - LimitSwitch 'Safety' initialized on pin 6
+2025-12-06 18:22:33,925 - src.motor_controller - INFO - Joystick initialized (SIMULATED)
+2025-12-06 18:22:33,925 - src.logic_a - INFO - Logic A initialized
+2025-12-06 18:22:33,926 - src.rtc_handler - INFO - RTC Handler initialized (SIMULATED - using system time)
+2025-12-06 18:22:33,926 - src.logic_b - INFO - Logic B initialized with RTC support
+2025-12-06 18:22:33,926 - src.execution_manager - INFO - Execution Manager initialized
+2025-12-06 18:22:33,926 - __main__ - INFO - Initializing web server...
+2025-12-06 18:22:33,968 - src.web_server - INFO - Web server initialized
+2025-12-06 18:22:33,968 - __main__ - INFO - System initialization complete
+2025-12-06 18:22:33,969 - __main__ - INFO - ============================================================
+2025-12-06 18:22:33,969 - __main__ - INFO - RPi Motor Control System Starting
+2025-12-06 18:22:33,970 - __main__ - INFO - Mode: SIMULATION
+2025-12-06 18:22:33,970 - __main__ - INFO - ============================================================
+2025-12-06 18:22:33,970 - __main__ - INFO - Web interface will be available at: http://0.0.0.0:5000
+2025-12-06 18:22:33,970 - src.web_server - INFO - Starting web server on 0.0.0.0:5000
+2025-12-06 18:22:33,983 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.43.62:5000
+2025-12-06 18:22:33,983 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-12-06 18:23:02,324 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 18:23:02] "GET / HTTP/1.1" 200 -
+2025-12-06 18:23:02,454 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 18:23:02] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-12-06 18:23:02,585 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 18:23:02] "GET /static/js/main.js HTTP/1.1" 200 -
+2025-12-06 18:23:02,915 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 18:23:02] "GET /api/status HTTP/1.1" 200 -
+2025-12-06 18:23:02,915 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 18:23:02] "GET /socket.io/?EIO=4&transport=polling&t=PhpkGu4 HTTP/1.1" 200 -
+2025-12-06 18:23:02,978 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 18:23:02] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-12-06 18:23:03,173 - src.web_server - INFO - Client connected: j9XgIQqxnwYdVrasAAAB
+2025-12-06 18:23:03,174 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 18:23:03] "POST /socket.io/?EIO=4&transport=polling&t=PhpkGzA&sid=EG1WyctuKzfG8ZnUAAAA HTTP/1.1" 200 -
+2025-12-06 18:23:03,278 - werkzeug - INFO - 127.0.0.1 - - [06/Dec/2025 18:23:03] "GET /socket.io/?EIO=4&transport=polling&t=PhpkGzB&sid=EG1WyctuKzfG8ZnUAAAA HTTP/1.1" 200 -
+2025-12-06 18:29:33,265 - __main__ - INFO - Received signal 2
+2025-12-06 18:29:33,265 - __main__ - INFO - Shutting down system...
+2025-12-06 18:29:33,265 - __main__ - INFO - Stopping execution manager...
+2025-12-06 18:29:33,265 - src.execution_manager - CRITICAL - EMERGENCY STOP triggered
+2025-12-06 18:29:33,266 - src.execution_manager - INFO - Execution Manager cleanup started
+2025-12-06 18:29:33,266 - src.logic_a - INFO - Logic A cleanup complete
+2025-12-06 18:29:33,267 - src.logic_a - INFO - Logic A cleanup complete
+2025-12-06 18:29:33,267 - src.logic_b - INFO - Logic B cleanup complete
+2025-12-06 18:29:33,267 - src.execution_manager - INFO - Execution Manager cleanup complete
+2025-12-06 18:29:33,267 - __main__ - INFO - Stopping web server...
+2025-12-06 18:29:33,268 - src.web_server - INFO - Stopping web server
+2025-12-06 18:29:33,268 - __main__ - INFO - Cleaning up hardware interface...
+2025-12-06 18:29:33,268 - src.hardware_interface - INFO - Simulated GPIO cleanup
+2025-12-06 18:29:33,269 - __main__ - INFO - System shutdown complete
+2025-12-06 18:29:33,269 - __main__ - INFO - Shutting down system...
+2025-12-06 18:29:33,269 - __main__ - INFO - Stopping execution manager...
+2025-12-06 18:29:33,269 - src.execution_manager - CRITICAL - EMERGENCY STOP triggered
+2025-12-06 18:29:33,270 - src.execution_manager - INFO - Execution Manager cleanup started
+2025-12-06 18:29:33,270 - src.logic_a - INFO - Logic A cleanup complete
+2025-12-06 18:29:33,270 - src.logic_a - INFO - Logic A cleanup complete
+2025-12-06 18:29:33,270 - src.logic_b - INFO - Logic B cleanup complete
+2025-12-06 18:29:33,270 - src.execution_manager - INFO - Execution Manager cleanup complete
+2025-12-06 18:29:33,271 - __main__ - INFO - Stopping web server...
+2025-12-06 18:29:33,271 - src.web_server - INFO - Stopping web server
+2025-12-06 18:29:33,271 - __main__ - INFO - Cleaning up hardware interface...
+2025-12-06 18:29:33,271 - src.hardware_interface - INFO - Simulated GPIO cleanup
+2025-12-06 18:29:33,271 - __main__ - INFO - System shutdown complete

@@ -648,3 +648,283 @@ footer {
   color: var(--primary-color);
   font-weight: 700;
 }
+
+/* New UI Components - Redesigned Control Screen */
+
+/* Logic Status Card */
+.logic-status-card {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
+  color: white;
+  padding: 25px;
+}
+
+.logic-status-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.current-logic-info h2 {
+  margin: 0 0 15px 0;
+  font-size: 1.2em;
+  opacity: 0.9;
+}
+
+.logic-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.logic-name {
+  font-size: 2em;
+  font-weight: 700;
+  display: block;
+}
+
+.logic-description {
+  font-size: 1em;
+  opacity: 0.9;
+  display: block;
+}
+
+.btn-change-logic {
+  background: white;
+  color: var(--primary-color);
+  padding: 15px 30px;
+  font-size: 1.1em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-change-logic:hover {
+  background: var(--bg-color);
+  transform: translateY(-2px);
+}
+
+/* Large Mode Selector */
+.mode-selector-large {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.mode-btn-large {
+  padding: 30px 20px;
+  border: 3px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode-btn-large:hover {
+  border-color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.mode-btn-large.selected {
+  border-color: var(--success-color);
+  background: var(--success-color);
+  color: white;
+}
+
+.mode-number {
+  font-size: 2.5em;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.mode-btn-large.selected .mode-number,
+.mode-btn-large.selected .mode-label {
+  color: white;
+}
+
+.mode-label {
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.selected-mode-display {
+  text-align: center;
+  padding: 15px;
+  background: var(--bg-color);
+  border-radius: 8px;
+  font-size: 1.1em;
+}
+
+.selected-mode-display strong {
+  color: var(--secondary-color);
+}
+
+.selected-mode-display span {
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 1.3em;
+  margin-left: 10px;
+}
+
+/* Large Control Buttons */
+.btn-large {
+  padding: 20px 40px;
+  font-size: 1.3em;
+}
+
+/* Modal for Logic Change */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  animation: fadeIn 0.3s;
+}
+
+.modal.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  max-width: 500px;
+  width: 90%;
+  animation: slideDown 0.3s;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content h2 {
+  margin: 0 0 10px 0;
+  color: var(--primary-color);
+}
+
+.modal-content p {
+  margin-bottom: 25px;
+  color: var(--secondary-color);
+}
+
+.logic-selection-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.logic-selection-modal label {
+  cursor: pointer;
+}
+
+.logic-selection-modal input[type="radio"] {
+  display: none;
+}
+
+.logic-option {
+  padding: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.logic-option strong {
+  font-size: 1.3em;
+  color: var(--text-color);
+}
+
+.logic-option span {
+  color: var(--secondary-color);
+  font-size: 0.95em;
+}
+
+.logic-selection-modal input[type="radio"]:checked + .logic-option {
+  border-color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.logic-option:hover {
+  border-color: var(--primary-color);
+  transform: translateX(5px);
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.modal-buttons .btn {
+  flex: 1;
+}
+
+/* Responsive adjustments for new design */
+@media (max-width: 768px) {
+  .mode-selector-large {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .logic-status-display {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-change-logic {
+    width: 100%;
+  }
+
+  .modal-content {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mode-selector-large {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mode-number {
+    font-size: 2em;
+  }
+
+  .btn-large {
+    padding: 15px 25px;
+    font-size: 1.1em;
+  }
+}

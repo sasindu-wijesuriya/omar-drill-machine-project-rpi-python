@@ -76,21 +76,12 @@ function updateStatus(data) {
         : data.selected_logic === "logic_b"
         ? "B"
         : null;
-    document.getElementById("selected-logic-display").textContent =
-      selectedLogic || "None";
 
-    // Update button states
-    document
-      .querySelectorAll(".logic-btn")
-      .forEach((btn) => btn.classList.remove("selected"));
-    if (selectedLogic) {
-      document
-        .getElementById(`logic-${selectedLogic.toLowerCase()}-btn`)
-        .classList.add("selected");
-    }
+    // Update the current logic badge
+    updateCurrentLogicDisplay(selectedLogic);
   }
 
-  // Update active logic display
+  // Update active logic display in status section
   const activeLogic =
     data.active_logic === "logic_a"
       ? "A"
@@ -121,11 +112,16 @@ function updateStatus(data) {
 
       // Update mode button states
       document
-        .querySelectorAll(".mode-btn")
+        .querySelectorAll(".mode-btn, .mode-btn-large")
         .forEach((btn) => btn.classList.remove("selected"));
-      document
-        .querySelectorAll(".mode-btn")
-        [selectedMode - 1]?.classList.add("selected");
+      const modeButtons = document.querySelectorAll(".mode-btn-large");
+      if (modeButtons.length > 0) {
+        modeButtons[selectedMode - 1]?.classList.add("selected");
+      } else {
+        document
+          .querySelectorAll(".mode-btn")
+          [selectedMode - 1]?.classList.add("selected");
+      }
     }
   }
 
@@ -357,3 +353,141 @@ function showTab(tabName) {
   // Activate button
   event.target.classList.add("active");
 }
+
+// New functions for redesigned UI
+
+// Update current logic display badge
+function updateCurrentLogicDisplay(logic) {
+  const logicName = document.getElementById("current-logic-name");
+  const logicDesc = document.getElementById("current-logic-desc");
+
+  if (!logic) {
+    logicName.textContent = "None Selected";
+    logicDesc.textContent = "Please select a logic to begin";
+    return;
+  }
+
+  if (logic === "A") {
+    logicName.textContent = "Logic A";
+    logicDesc.textContent = "Standard Control Mode";
+  } else if (logic === "B") {
+    logicName.textContent = "Logic B";
+    logicDesc.textContent = "With RTC Date Check";
+  }
+}
+
+// Show change logic dialog
+function showChangeLogicDialog() {
+  const modal = document.getElementById("logic-change-modal");
+  modal.classList.add("active");
+
+  // Pre-select current logic
+  if (selectedLogic === "A") {
+    document.getElementById("radio-logic-a").checked = true;
+  } else if (selectedLogic === "B") {
+    document.getElementById("radio-logic-b").checked = true;
+  }
+
+  // Clear password and error
+  document.getElementById("logic-password").value = "";
+  document.getElementById("logic-error-message").style.display = "none";
+
+  // Focus on password field if logic is already selected
+  if (selectedLogic) {
+    setTimeout(() => {
+      document.getElementById("logic-password").focus();
+    }, 100);
+  }
+}
+
+// Close change logic dialog
+function closeChangeLogicDialog() {
+  const modal = document.getElementById("logic-change-modal");
+  modal.classList.remove("active");
+}
+
+// Confirm logic change with password verification
+async function confirmLogicChange() {
+  const newLogic = document.querySelector(
+    'input[name="new-logic"]:checked'
+  )?.value;
+  const password = document.getElementById("logic-password").value;
+  const errorDiv = document.getElementById("logic-error-message");
+
+  // Validation
+  if (!newLogic) {
+    errorDiv.textContent = "Please select a logic";
+    errorDiv.style.display = "block";
+    return;
+  }
+
+  if (!password) {
+    errorDiv.textContent = "Please enter password";
+    errorDiv.style.display = "block";
+    return;
+  }
+
+  try {
+    // Verify password using engineer login endpoint
+    const authResponse = await fetch("/api/engineer/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: password }),
+    });
+
+    const authData = await authResponse.json();
+
+    if (!authData.success) {
+      errorDiv.textContent = "Invalid password";
+      errorDiv.style.display = "block";
+      document.getElementById("logic-password").value = "";
+      return;
+    }
+
+    // Password verified, now change logic
+    const logicResponse = await fetch("/api/select_logic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ logic: newLogic }),
+    });
+
+    const logicData = await logicResponse.json();
+
+    if (logicData.success) {
+      selectedLogic = newLogic;
+      updateCurrentLogicDisplay(newLogic);
+      closeChangeLogicDialog();
+      showNotification(`Logic ${newLogic} selected successfully`, "success");
+
+      // Logout from engineer session
+      await fetch("/api/engineer/logout", { method: "POST" });
+    } else {
+      errorDiv.textContent = logicData.error || "Failed to change logic";
+      errorDiv.style.display = "block";
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    errorDiv.textContent = "Error changing logic: " + error.message;
+    errorDiv.style.display = "block";
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener("click", function (event) {
+  const modal = document.getElementById("logic-change-modal");
+  if (event.target === modal) {
+    closeChangeLogicDialog();
+  }
+});
+
+// Handle Enter key in password field
+document.addEventListener("DOMContentLoaded", function () {
+  const passwordField = document.getElementById("logic-password");
+  if (passwordField) {
+    passwordField.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        confirmLogicChange();
+      }
+    });
+  }
+});

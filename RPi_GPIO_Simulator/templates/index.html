@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raspberry Pi GPIO Simulator</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🍓 Raspberry Pi GPIO Simulator</h1>
+        <p class="subtitle">Interactive GPIO testing for RPi_Motor_Control</p>
+        <div class="status-bar">
+          <span class="status-indicator" id="connection-status">
+            <span class="status-dot offline"></span>
+            Disconnected
+          </span>
+          <button class="btn btn-secondary" id="reset-btn">
+            Reset All Pins
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <div class="grid-container">
+          <!-- Left Column - GPIO Pinout -->
+          <div class="gpio-pinout">
+            <h2>Raspberry Pi 40-Pin Header</h2>
+            <div class="pinout-legend">
+              <span class="legend-item"
+                ><span class="pin-indicator output"></span> Output</span
+              >
+              <span class="legend-item"
+                ><span class="pin-indicator input"></span> Input</span
+              >
+              <span class="legend-item"
+                ><span class="pin-indicator high"></span> HIGH (1)</span
+              >
+              <span class="legend-item"
+                ><span class="pin-indicator low"></span> LOW (0)</span
+              >
+            </div>
+
+            <div class="pin-grid" id="pin-grid">
+              <!-- Pins will be dynamically generated -->
+            </div>
+          </div>
+
+          <!-- Right Column - Controls and Info -->
+          <div class="control-panel">
+            <div class="panel-section">
+              <h2>🎮 Input Controls</h2>
+              <p class="help-text">
+                Click buttons and switches to simulate input signals
+              </p>
+
+              <div class="control-group">
+                <h3>Buttons (Active LOW - Pull-up)</h3>
+                <div class="button-controls">
+                  <button class="control-btn" data-pin="17" data-type="button">
+                    <span class="btn-icon">🔴</span>
+                    <span class="btn-label">Reset (GPIO 17)</span>
+                    <span class="btn-state" data-pin="17">Released</span>
+                  </button>
+                  <button class="control-btn" data-pin="27" data-type="button">
+                    <span class="btn-icon">▶️</span>
+                    <span class="btn-label">Start (GPIO 27)</span>
+                    <span class="btn-state" data-pin="27">Released</span>
+                  </button>
+                  <button class="control-btn" data-pin="22" data-type="button">
+                    <span class="btn-icon">⏹️</span>
+                    <span class="btn-label">Stop (GPIO 22)</span>
+                    <span class="btn-state" data-pin="22">Released</span>
+                  </button>
+                  <button class="control-btn" data-pin="5" data-type="button">
+                    <span class="btn-icon">🔧</span>
+                    <span class="btn-label">Tala (GPIO 5)</span>
+                    <span class="btn-state" data-pin="5">Released</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <h3>Limit Switches (Active LOW - Pull-up)</h3>
+                <div class="switch-controls">
+                  <label class="switch-control">
+                    <input type="checkbox" data-pin="13" data-type="limit" />
+                    <span class="switch-slider"></span>
+                    <span class="switch-label">Home Limit (GPIO 13)</span>
+                  </label>
+                  <label class="switch-control">
+                    <input type="checkbox" data-pin="19" data-type="limit" />
+                    <span class="switch-slider"></span>
+                    <span class="switch-label">Final Limit (GPIO 19)</span>
+                  </label>
+                  <label class="switch-control">
+                    <input type="checkbox" data-pin="6" data-type="safety" />
+                    <span class="switch-slider"></span>
+                    <span class="switch-label">Safety Switch (GPIO 6)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <h2>📊 Motor Outputs</h2>
+              <p class="help-text">
+                Monitor motor control signals from your application
+              </p>
+
+              <div class="motor-indicators">
+                <div class="motor-group">
+                  <h3>Motor 1 (Linear)</h3>
+                  <div class="motor-pins">
+                    <div class="motor-pin">
+                      <span class="pin-label">Pulsos1 (GPIO 18)</span>
+                      <div class="led-indicator" data-pin="18"></div>
+                      <span class="pin-value" data-pin="18">0</span>
+                    </div>
+                    <div class="motor-pin">
+                      <span class="pin-label">Dir1 (GPIO 23)</span>
+                      <div class="led-indicator" data-pin="23"></div>
+                      <span class="pin-value" data-pin="23">0</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="motor-group">
+                  <h3>Motor 2 (Taladro)</h3>
+                  <div class="motor-pins">
+                    <div class="motor-pin">
+                      <span class="pin-label">Pulsos2 (GPIO 24)</span>
+                      <div class="led-indicator" data-pin="24"></div>
+                      <span class="pin-value" data-pin="24">0</span>
+                    </div>
+                    <div class="motor-pin">
+                      <span class="pin-label">Dir2 (GPIO 25)</span>
+                      <div class="led-indicator" data-pin="25"></div>
+                      <span class="pin-value" data-pin="25">0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <h2>ℹ️ Instructions</h2>
+              <ol class="instructions">
+                <li>Start this simulator (already running on port 8100)</li>
+                <li>
+                  In the RPi_Motor_Control folder, set
+                  <code>"simulation_mode": true</code> in
+                  <code>config/system_config.json</code>
+                </li>
+                <li>Run your motor control application on port 5000</li>
+                <li>
+                  Use the controls above to simulate button presses and limit
+                  switches
+                </li>
+                <li>Watch the motor outputs respond in real-time</li>
+              </ol>
+            </div>
+
+            <div class="panel-section activity-log">
+              <h2>📝 Activity Log</h2>
+              <div id="activity-log" class="log-content">
+                <p class="log-entry">Simulator initialized</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <p>GPIO Simulator for Omar's Drill Machine Project | Port 8100</p>
+      </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>
