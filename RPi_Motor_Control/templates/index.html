@@ -35,68 +35,103 @@
 
       <!-- Control Tab -->
       <div id="control-tab" class="tab-content active">
-        <section class="card">
-          <h2>Logic Selection</h2>
-          <div class="logic-selector">
+        <!-- Current Logic Display & Change Button -->
+        <section class="card logic-status-card">
+          <div class="logic-status-display">
+            <div class="current-logic-info">
+              <h2>Current Logic</h2>
+              <div class="logic-badge" id="current-logic-badge">
+                <span class="logic-name" id="current-logic-name"
+                  >None Selected</span
+                >
+                <span class="logic-description" id="current-logic-desc"
+                  >Please select a logic to begin</span
+                >
+              </div>
+              <div
+                class="manual-mode-indicator"
+                id="manual-mode-indicator"
+                style="display: none"
+              >
+                <span class="badge badge-manual">🕹️ MANUAL MODE ACTIVE</span>
+              </div>
+            </div>
             <button
-              class="logic-btn"
-              id="logic-a-btn"
-              onclick="selectLogic('A')"
+              class="btn btn-primary btn-change-logic"
+              onclick="showChangeLogicDialog()"
             >
-              <span class="logic-label">Logic A</span>
-              <span class="logic-desc">Standard Control</span>
+              🔄 Change Logic
             </button>
-            <button
-              class="logic-btn"
-              id="logic-b-btn"
-              onclick="selectLogic('B')"
-            >
-              <span class="logic-label">Logic B</span>
-              <span class="logic-desc">With RTC Check</span>
-            </button>
-          </div>
-          <div class="selected-logic">
-            Selected: <span id="selected-logic-display">None</span>
           </div>
         </section>
 
+        <!-- Mode Selection (Prominent at top) -->
         <section class="card">
-          <h2>Mode Selection</h2>
-          <div class="mode-selector">
-            <button class="mode-btn" onclick="selectMode(1)">Mode 1</button>
-            <button class="mode-btn" onclick="selectMode(2)">Mode 2</button>
-            <button class="mode-btn" onclick="selectMode(3)">Mode 3</button>
-            <button class="mode-btn" onclick="selectMode(4)">Mode 4</button>
-            <button class="mode-btn" onclick="selectMode(5)">Mode 5</button>
+          <h2>Select Operating Mode</h2>
+          <div class="mode-selector-large">
+            <button class="mode-btn-large" onclick="selectMode(1)">
+              <span class="mode-number">1</span>
+              <span class="mode-label">Mode 1</span>
+            </button>
+            <button class="mode-btn-large" onclick="selectMode(2)">
+              <span class="mode-number">2</span>
+              <span class="mode-label">Mode 2</span>
+            </button>
+            <button class="mode-btn-large" onclick="selectMode(3)">
+              <span class="mode-number">3</span>
+              <span class="mode-label">Mode 3</span>
+            </button>
+            <button class="mode-btn-large" onclick="selectMode(4)">
+              <span class="mode-number">4</span>
+              <span class="mode-label">Mode 4</span>
+            </button>
+            <button class="mode-btn-large" onclick="selectMode(5)">
+              <span class="mode-number">5</span>
+              <span class="mode-label">Mode 5</span>
+            </button>
           </div>
-          <div class="selected-mode">
-            Selected Mode: <span id="selected-mode-display">None</span>
+          <div class="selected-mode-display">
+            <strong>Selected Mode:</strong>
+            <span id="selected-mode-display">None</span>
           </div>
         </section>
 
+        <!-- Operation Controls -->
         <section class="card">
           <h2>Operation Controls</h2>
           <div class="control-buttons">
-            <button class="btn btn-success" onclick="startExecution()">
+            <button
+              class="btn btn-success btn-large"
+              onclick="startExecution()"
+            >
               ▶️ START
             </button>
-            <button class="btn btn-warning" onclick="stopExecution()">
+            <button class="btn btn-warning btn-large" onclick="stopExecution()">
               ⏸️ STOP
             </button>
-            <button class="btn btn-danger" onclick="emergencyStop()">
+            <button class="btn btn-danger btn-large" onclick="emergencyStop()">
               🛑 EMERGENCY STOP
             </button>
           </div>
           <div class="control-buttons">
-            <button class="btn btn-secondary" onclick="enableManual()">
-              🕹️ Manual Mode
+            <button
+              class="btn btn-secondary"
+              id="manual-mode-btn"
+              onclick="enableManual()"
+            >
+              🕹️ Enable Manual Mode
             </button>
-            <button class="btn btn-secondary" onclick="disableManual()">
-              🤖 Auto Mode
+            <button
+              class="btn btn-secondary"
+              id="auto-mode-btn"
+              onclick="disableManual()"
+            >
+              🤖 Enable Auto Mode
             </button>
           </div>
         </section>
 
+        <!-- Current Status -->
         <section class="card">
           <h2>Current Status</h2>
           <div class="status-grid">
@@ -126,6 +161,69 @@
             </div>
           </div>
         </section>
+      </div>
+
+      <!-- Logic Change Password Dialog (Modal) -->
+      <div id="logic-change-modal" class="modal">
+        <div class="modal-content">
+          <h2>Change Logic</h2>
+          <p>Select new logic and enter password to confirm:</p>
+
+          <div class="logic-selection-modal">
+            <label>
+              <input
+                type="radio"
+                name="new-logic"
+                value="A"
+                id="radio-logic-a"
+              />
+              <div class="logic-option">
+                <strong>Logic A</strong>
+                <span>Standard Control</span>
+              </div>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="new-logic"
+                value="B"
+                id="radio-logic-b"
+              />
+              <div class="logic-option">
+                <strong>Logic B</strong>
+                <span>With RTC Date Check</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="logic-password">Password:</label>
+            <input
+              type="password"
+              id="logic-password"
+              class="form-control"
+              placeholder="Enter password"
+            />
+          </div>
+
+          <div
+            id="logic-error-message"
+            class="error-message"
+            style="display: none"
+          ></div>
+
+          <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="confirmLogicChange()">
+              Confirm
+            </button>
+            <button
+              class="btn btn-secondary"
+              onclick="closeChangeLogicDialog()"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Status Tab -->

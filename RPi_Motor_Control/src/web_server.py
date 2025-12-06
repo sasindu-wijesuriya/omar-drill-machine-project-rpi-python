@@ -207,7 +207,7 @@ class WebServer:
                 data = request.get_json()
                 password = data.get('password', '')
                 
-                if password == self.config.get('engineer_password', 'engineer2025'):
+                if password == self.config.get('engineer_password', '1234'):
                     session['engineer_authenticated'] = True
                     return jsonify({'success': True, 'message': 'Authentication successful'})
                 else:
