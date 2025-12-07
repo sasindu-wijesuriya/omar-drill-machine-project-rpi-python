@@ -21,16 +21,18 @@ logger = logging.getLogger(__name__)
 class WebServer:
     """Flask web server with SocketIO for real-time updates"""
     
-    def __init__(self, execution_manager: ExecutionManager, config: Dict[str, Any]):
+    def __init__(self, execution_manager: ExecutionManager, config: Dict[str, Any], gpio_monitor=None):
         """
         Initialize web server
         
         Args:
             execution_manager: Execution manager instance
             config: Web server configuration
+            gpio_monitor: GPIO monitor instance (optional)
         """
         self.execution_manager = execution_manager
         self.config = config
+        self.gpio_monitor = gpio_monitor
         
         # Create Flask app
         template_dir = Path(__file__).parent.parent / 'templates'
@@ -83,6 +85,11 @@ class WebServer:
         @self.app.route('/logs')
         def logs():
             return render_template('logs.html')
+        
+        # GPIO Monitor page
+        @self.app.route('/gpio')
+        def gpio_monitor_page():
+            return render_template('gpio_monitor.html')
         
         # API: Get system status
         @self.app.route('/api/status', methods=['GET'])
@@ -137,20 +144,47 @@ class WebServer:
         # API: Start execution
         @self.app.route('/api/start', methods=['POST'])
         def start_execution():
+            """Start the logic thread (initializes the system)"""
             try:
                 success = self.execution_manager.start_selected_logic()
                 
                 if success:
-                    return jsonify({'success': True, 'message': 'Execution started'})
+                    return jsonify({'success': True, 'message': 'Logic thread started'})
                 else:
-                    return jsonify({'error': 'Failed to start execution'}), 400
+                    return jsonify({'error': 'Failed to start logic thread'}), 400
             except Exception as e:
                 logger.error(f"Start error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: Simulate button press (for web interface control)
+        @self.app.route('/api/button/<button_name>', methods=['POST'])
+        def press_button(button_name):
+            """Simulate a physical button press"""
+            try:
+                # Valid button names: start, stop, reset, tala
+                valid_buttons = ['start', 'stop', 'reset', 'tala']
+                if button_name not in valid_buttons:
+                    return jsonify({'error': f'Invalid button name. Valid: {valid_buttons}'}), 400
+                
+                # Simulate button press and release
+                hw = self.execution_manager.hw
+                hw.simulate_button_press(button_name)
+                # Auto-release after 100ms
+                import time, threading
+                def release_button():
+                    time.sleep(0.1)
+                    hw.simulate_button_release(button_name)
+                threading.Thread(target=release_button, daemon=True).start()
+                
+                return jsonify({'success': True, 'message': f'{button_name.capitalize()} button pressed'})
+            except Exception as e:
+                logger.error(f"Button press error: {e}")
                 return jsonify({'error': str(e)}), 500
         
         # API: Stop execution
         @self.app.route('/api/stop', methods=['POST'])
         def stop_execution():
+            """Stop the logic thread"""
             try:
                 success = self.execution_manager.stop_active_logic()
                 
@@ -260,6 +294,119 @@ class WebServer:
                 logger.error(f"Update parameter error: {e}")
                 return jsonify({'error': str(e)}), 500
         
+        # API: GPIO Monitor - Get all pins status
+        @self.app.route('/api/gpio/status', methods=['GET'])
+        def get_gpio_status():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                pins = self.gpio_monitor.get_all_pins_status()
+                return jsonify({'pins': pins})
+            except Exception as e:
+                logger.error(f"GPIO status error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Get pin groups
+        @self.app.route('/api/gpio/groups', methods=['GET'])
+        def get_gpio_groups():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                groups = self.gpio_monitor.get_pin_groups()
+                return jsonify(groups)
+            except Exception as e:
+                logger.error(f"GPIO groups error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Get specific pin status
+        @self.app.route('/api/gpio/pin/<int:pin>', methods=['GET'])
+        def get_pin_status(pin):
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                status = self.gpio_monitor.get_pin_status(pin)
+                if status:
+                    return jsonify(status)
+                else:
+                    return jsonify({'error': 'Pin not found'}), 404
+            except Exception as e:
+                logger.error(f"Pin status error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Write to pin
+        @self.app.route('/api/gpio/write', methods=['POST'])
+        def write_gpio_pin():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                data = request.get_json()
+                pin = data.get('pin')
+                value = data.get('value')
+                
+                if pin is None or value is None:
+                    return jsonify({'error': 'Missing pin or value'}), 400
+                
+                result = self.gpio_monitor.write_pin(int(pin), int(value))
+                
+                # Broadcast GPIO update via websocket
+                if result.get('success'):
+                    self.socketio.emit('gpio_update', {
+                        'pin': pin,
+                        'value': value,
+                        'name': result.get('name', '')
+                    })
+                
+                return jsonify(result)
+            except Exception as e:
+                logger.error(f"GPIO write error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Simulate button press
+        @self.app.route('/api/gpio/button_press', methods=['POST'])
+        def simulate_button_press():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                data = request.get_json()
+                pin = data.get('pin')
+                duration = data.get('duration', 100)
+                
+                if pin is None:
+                    return jsonify({'error': 'Missing pin'}), 400
+                
+                result = self.gpio_monitor.simulate_button_press(int(pin), int(duration))
+                
+                # Broadcast button press via websocket
+                if result.get('success'):
+                    self.socketio.emit('button_pressed', {
+                        'pin': pin,
+                        'name': result.get('name', ''),
+                        'duration': duration
+                    })
+                
+                return jsonify(result)
+            except Exception as e:
+                logger.error(f"Button press simulation error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Get writable pins
+        @self.app.route('/api/gpio/writable', methods=['GET'])
+        def get_writable_pins():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                pins = self.gpio_monitor.get_input_pins()
+                return jsonify({'pins': pins})
+            except Exception as e:
+                logger.error(f"Get writable pins error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
         # API: Get configuration by type
         @self.app.route('/api/config/<config_type>', methods=['GET'])
         @self._require_auth
@@ -319,6 +466,27 @@ class WebServer:
                 return jsonify({'success': True, 'message': 'Configuration saved'})
             except Exception as e:
                 logger.error(f"Save config error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: Reload configuration
+        @self.app.route('/api/reload_config', methods=['POST'])
+        def reload_config():
+            try:
+                # Stop the current logic if running
+                if self.execution_manager.get_current_logic():
+                    self.execution_manager.stop_logic()
+                    time.sleep(0.5)  # Wait for clean stop
+                
+                # Reload the configuration by restarting the logic if one was selected
+                selected_logic = self.execution_manager.current_logic
+                if selected_logic:
+                    # Re-select the same logic to reload config
+                    self.execution_manager.select_logic(selected_logic)
+                    logger.info(f"Reloaded configuration for {selected_logic}")
+                
+                return jsonify({'success': True, 'message': 'Configuration reloaded'})
+            except Exception as e:
+                logger.error(f"Reload config error: {e}")
                 return jsonify({'error': str(e)}), 500
         
         # API: Get logs
@@ -479,7 +647,8 @@ class WebServer:
             host=host, 
             port=port, 
             debug=debug,
-            use_reloader=False
+            use_reloader=False,
+            allow_unsafe_werkzeug=True
         )
     
     def stop(self):
@@ -488,15 +657,16 @@ class WebServer:
         # SocketIO cleanup handled automatically
 
 
-def create_web_server(execution_manager: ExecutionManager, config: Dict[str, Any]) -> WebServer:
+def create_web_server(execution_manager: ExecutionManager, config: Dict[str, Any], gpio_monitor=None) -> WebServer:
     """
     Factory function to create web server
     
     Args:
         execution_manager: Execution manager instance
         config: Web server configuration
+        gpio_monitor: GPIO monitor instance (optional)
     
     Returns:
         WebServer instance
     """
-    return WebServer(execution_manager, config)
+    return WebServer(execution_manager, config, gpio_monitor)

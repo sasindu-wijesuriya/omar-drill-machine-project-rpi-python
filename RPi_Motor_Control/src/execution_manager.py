@@ -74,23 +74,33 @@ class ExecutionManager:
             True if selection successful, False otherwise
         """
         with self._lock:
+            logger.info(f"==== Logic Selection Request: {logic.upper()} ====")
+            
             # Cannot change logic while one is running
             if self._active_logic != ActiveLogic.NONE:
-                logger.warning(f"Cannot select logic - {self._active_logic.value} is currently running")
+                logger.warning(f"❌ Cannot select logic - {self._active_logic.value} is currently running")
+                logger.warning("⚠️  Stop the active logic first before selecting a new one")
                 return False
             
             if logic.upper() == "A":
                 self._selected_logic = ActiveLogic.LOGIC_A
-                logger.info("Logic A selected")
+                logger.info("✓ Logic A (CG4n51_L1) selected successfully")
+                logger.info("  - Standard motor control logic")
+                logger.info("  - No RTC date checking")
+                logger.info("  - Ready to start")
                 self.csv_logger.log_operation("System", "Selection", "LogicA", "Selected")
                 return True
             elif logic.upper() == "B":
                 self._selected_logic = ActiveLogic.LOGIC_B
-                logger.info("Logic B selected")
+                logger.info("✓ Logic B (CG4n51_L2) selected successfully")
+                logger.info("  - Motor control with RTC date checking")
+                logger.info("  - Target date lockout enabled")
+                logger.info("  - Ready to start")
                 self.csv_logger.log_operation("System", "Selection", "LogicB", "Selected")
                 return True
             else:
-                logger.error(f"Invalid logic selection: {logic}")
+                logger.error(f"❌ Invalid logic selection: {logic}")
+                logger.error("   Valid options are: 'A' or 'B'")
                 return False
     
     def start_selected_logic(self) -> bool:
@@ -101,27 +111,41 @@ class ExecutionManager:
             True if started successfully, False otherwise
         """
         with self._lock:
+            logger.info("==== Start Logic Request ====")
+            
             if self._selected_logic == ActiveLogic.NONE:
-                logger.error("No logic selected")
+                logger.error("❌ Cannot start: No logic selected")
+                logger.error("   Please select Logic A or Logic B first")
                 return False
             
             if self._active_logic != ActiveLogic.NONE:
-                logger.warning(f"Cannot start - {self._active_logic.value} is already running")
+                logger.warning(f"⚠️  Cannot start - {self._active_logic.value} is already running")
+                logger.warning("   Stop the current logic before starting another")
                 return False
             
             try:
                 if self._selected_logic == ActiveLogic.LOGIC_A:
+                    logger.info("Starting Logic A (CG4n51_L1)...")
+                    logger.info("  - Initializing execution thread")
                     self.logic_a.start()
                     self._active_logic = ActiveLogic.LOGIC_A
-                    logger.info("Logic A started")
+                    logger.info("✓ Logic A started successfully")
+                    logger.info("  - System state: ACTIVE")
+                    logger.info("  - Monitoring inputs and executing control logic")
                     return True
                 elif self._selected_logic == ActiveLogic.LOGIC_B:
+                    logger.info("Starting Logic B (CG4n51_L2)...")
+                    logger.info("  - Initializing execution thread")
+                    logger.info("  - Checking RTC date")
                     self.logic_b.start()
                     self._active_logic = ActiveLogic.LOGIC_B
-                    logger.info("Logic B started")
+                    logger.info("✓ Logic B started successfully")
+                    logger.info("  - System state: ACTIVE")
+                    logger.info("  - Monitoring inputs, RTC, and executing control logic")
                     return True
             except Exception as e:
-                logger.error(f"Failed to start logic: {e}", exc_info=True)
+                logger.error(f"❌ Failed to start logic: {e}", exc_info=True)
+                logger.error("   Check hardware connections and configuration")
                 self.csv_logger.log_error("System", "Execution", f"Start failed: {e}")
                 return False
         
@@ -135,42 +159,70 @@ class ExecutionManager:
             True if stopped successfully, False otherwise
         """
         with self._lock:
+            logger.info("==== Stop Logic Request ====")
+            
             if self._active_logic == ActiveLogic.NONE:
-                logger.warning("No logic is currently running")
+                logger.warning("⚠️  No logic is currently running")
+                logger.info("   System is already idle")
                 return False
             
             try:
                 if self._active_logic == ActiveLogic.LOGIC_A:
+                    logger.info("Stopping Logic A...")
+                    logger.info("  - Stopping execution thread")
+                    logger.info("  - Halting all motor movements")
                     self.logic_a.stop()
-                    logger.info("Logic A stopped")
+                    logger.info("✓ Logic A stopped successfully")
+                    logger.info("  - All motors stopped")
+                    logger.info("  - System state: IDLE")
                 elif self._active_logic == ActiveLogic.LOGIC_B:
+                    logger.info("Stopping Logic B...")
+                    logger.info("  - Stopping execution thread")
+                    logger.info("  - Halting all motor movements")
                     self.logic_b.stop()
-                    logger.info("Logic B stopped")
+                    logger.info("✓ Logic B stopped successfully")
+                    logger.info("  - All motors stopped")
+                    logger.info("  - System state: IDLE")
                 
                 self._active_logic = ActiveLogic.NONE
                 return True
             except Exception as e:
-                logger.error(f"Failed to stop logic: {e}", exc_info=True)
+                logger.error(f"❌ Failed to stop logic: {e}", exc_info=True)
+                logger.error("   Force stopping to ensure safe state")
                 self.csv_logger.log_error("System", "Execution", f"Stop failed: {e}")
+                self._active_logic = ActiveLogic.NONE
                 return False
     
     def emergency_stop_all(self):
         """Emergency stop all operations immediately"""
-        logger.critical("EMERGENCY STOP triggered")
+        logger.critical("""\n
+╔═══════════════════════════════════════════╗
+║   ⚠️  EMERGENCY STOP TRIGGERED  ⚠️        ║
+╚═══════════════════════════════════════════╝
+        """)
+        logger.critical("🛑 Initiating emergency shutdown sequence")
+        logger.critical("   All motor operations will be halted immediately")
         
         with self._lock:
             # Stop both logics
             try:
+                logger.critical("  → Stopping Logic A...")
                 self.logic_a.stop()
+                logger.info("    ✓ Logic A stopped")
             except Exception as e:
-                logger.error(f"Error stopping Logic A: {e}")
+                logger.error(f"    ❌ Error stopping Logic A: {e}")
             
             try:
+                logger.critical("  → Stopping Logic B...")
                 self.logic_b.stop()
+                logger.info("    ✓ Logic B stopped")
             except Exception as e:
-                logger.error(f"Error stopping Logic B: {e}")
+                logger.error(f"    ❌ Error stopping Logic B: {e}")
             
             self._active_logic = ActiveLogic.NONE
+            logger.critical("✓ EMERGENCY STOP COMPLETE")
+            logger.critical("   System is now in SAFE STATE")
+            logger.critical("   All motors stopped, system idle")
             
             self.csv_logger.log_operation("System", "Emergency", "EmergencyStop", "Completed")
     
@@ -185,19 +237,34 @@ class ExecutionManager:
             True if successful, False otherwise
         """
         with self._lock:
+            logger.info(f"==== Mode Selection: Mode {mode_number} ====")
+            
             if self._selected_logic == ActiveLogic.NONE:
-                logger.error("No logic selected")
+                logger.error("❌ Cannot select mode: No logic selected")
+                logger.error("   Please select Logic A or Logic B first")
+                return False
+            
+            if mode_number < 1 or mode_number > 5:
+                logger.error(f"❌ Invalid mode number: {mode_number}")
+                logger.error("   Valid modes are: 1, 2, 3, 4, or 5")
                 return False
             
             try:
                 if self._selected_logic == ActiveLogic.LOGIC_A:
+                    logger.info(f"Setting Logic A to Mode {mode_number}")
                     self.logic_a.select_mode(mode_number)
+                    logger.info(f"✓ Logic A Mode {mode_number} selected")
+                    logger.info(f"   Mode parameters loaded and ready")
                     return True
                 elif self._selected_logic == ActiveLogic.LOGIC_B:
+                    logger.info(f"Setting Logic B to Mode {mode_number}")
                     self.logic_b.select_mode(mode_number)
+                    logger.info(f"✓ Logic B Mode {mode_number} selected")
+                    logger.info(f"   Mode parameters loaded and ready")
                     return True
             except Exception as e:
-                logger.error(f"Failed to select mode: {e}", exc_info=True)
+                logger.error(f"❌ Failed to select mode: {e}", exc_info=True)
+                logger.error("   Check configuration and try again")
                 return False
         
         return False

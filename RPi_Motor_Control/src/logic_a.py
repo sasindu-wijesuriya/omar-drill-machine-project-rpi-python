@@ -211,11 +211,12 @@ class LogicA:
         self.en_espera = True
         self.mode = OperationMode.WAITING
         
-        # Find home position first
-        self.encontrar_home()
+        # Note: Home finding will happen when Start button is pressed
+        # This allows mode selection even when safety switch is unsafe
         
         self.csv_logger.log_operation("A", "Auto", f"Mode{mode_number}Selected", "Ready")
         logger.info(f"Mode {mode_number} selected, waiting for start")
+        logger.info("   Home finding will begin when Start button is pressed")
         
         self._update_status()
     
@@ -260,8 +261,8 @@ class LogicA:
         """Main execution loop (runs in separate thread)"""
         logger.info("Logic A main loop started")
         
-        # Initial home finding
-        self.encontrar_home()
+        # Note: Home finding will happen when Start button is pressed (not at startup)
+        # This allows logic selection even when safety switch is unsafe
         
         while self._running:
             try:
@@ -351,16 +352,31 @@ class LogicA:
     
     def _handle_waiting_mode(self):
         """Handle waiting for start button"""
-        if self.switch_s.is_triggered():  # Safety switch must be ON
-            if self.btn_start.check_rising_edge():
-                logger.info("Start button pressed, beginning execution")
-                self.en_espera = False
-                self.en_ejecucion = True
-                self.mode = OperationMode.RUNNING
-                
-                # Start execution in separate thread
-                execution_thread = threading.Thread(target=self.funcion_en_ejecucion, daemon=True)
-                execution_thread.start()
+        # Always check for start button press (regardless of safety state)
+        if self.btn_start.check_rising_edge():
+            logger.info("Start button pressed, beginning execution")
+            
+            # Check safety switch before starting
+            if not self.switch_s.is_triggered():
+                logger.warning("⚠️  Safety switch is UNSAFE - cannot start")
+                logger.warning("   Waiting for safety switch HIGH + Start button press...")
+                self.motor_stop_switch()
+                # After safety pause resolved, check if we should still start
+                if not self.en_espera:
+                    return  # Mode was changed during pause
+            
+            # Safety is good, proceed with execution
+            self.en_espera = False
+            self.en_ejecucion = True
+            self.mode = OperationMode.RUNNING
+            self._update_status()
+            
+            # Find home position first (before starting execution)
+            self.encontrar_home()
+            
+            # Start execution in separate thread
+            execution_thread = threading.Thread(target=self.funcion_en_ejecucion, daemon=True)
+            execution_thread.start()
     
     def _handle_home_limit_rebote(self):
         """Handle bounce back from home limit switch"""
@@ -396,8 +412,9 @@ class LogicA:
                 self.motor_detenido_por_boton_stop()
                 return True
             if not self.switch_s.is_triggered():
+                # Safety switch triggered - pause and wait, then continue (don't exit loop)
                 self.motor_stop_switch()
-                return True
+                return False  # Continue after safety pause is resolved
             if self.limit_home.check_rising_edge():
                 return True
             return False
@@ -438,16 +455,32 @@ class LogicA:
             time.sleep(0.01)
     
     def motor_stop_switch(self):
-        """Handle safety switch pause"""
-        logger.warning("Safety switch triggered - pausing")
-        self.position_description = "SAFETY PAUSE"
+        """Handle safety switch pause - wait for safety HIGH AND start button press"""
+        logger.critical("\u26d4 SAFETY PAUSE - System stopped")
+        logger.critical("   Safety switch triggered (LOW = unsafe)")
+        logger.warning("⏸️  Step 1: Waiting for safety switch to be HIGH (safe)...")
+        self.position_description = "EN PAUSA"
+        
+        # Mark as not running during pause
+        was_running = self.en_ejecucion
+        self.en_ejecucion = False
         self._update_status()
         
-        # Wait for start button
-        while self._running:
+        # Step 1: Wait for safety switch to return to safe state
+        while not self.switch_s.is_triggered():
+            time.sleep(0.05)
+        
+        logger.info("✓ Safety switch is now HIGH (safe)")
+        logger.warning("⏸️  Step 2: Waiting for Start button press to resume...")
+        
+        # Step 2: Wait for start button press
+        while True:
             if self.btn_start.check_rising_edge():
-                logger.info("Start button pressed - resuming from safety pause")
+                logger.info("✓ Start button pressed - resuming operation")
+                # Restore running state
+                self.en_ejecucion = was_running
                 time.sleep(self.config['tiempos']['tiempo_para_empezar_despues_stop_ms'] / 1000)
+                self._update_status()
                 return
             time.sleep(0.01)
     
@@ -588,17 +621,24 @@ class LogicA:
             return True
         
         if not self.switch_s.is_triggered():
+            # Safety switch triggered - pause and wait, then continue (don't exit)
             self.motor_stop_switch()
-            return True
+            return False  # Continue after safety pause is resolved
         
         return False
     
     def _update_status(self):
         """Update status and notify callback if set"""
         if self.status_callback:
+            # Determine display mode
+            if self.selected_mode > 0:
+                display_mode = f"Mode {self.selected_mode}"
+            else:
+                display_mode = self.mode.value
+            
             status = {
                 'logic': 'A',
-                'mode': self.mode.value,
+                'mode': display_mode,
                 'phase': self.cycle_phase.value if hasattr(self, 'cycle_phase') else 'idle',
                 'position': self.position_description,
                 'cycle_count': self.cycle_count,
@@ -611,17 +651,23 @@ class LogicA:
     
     def get_status(self) -> Dict[str, Any]:
         """Get current status"""
+        # Determine display mode: "Mode 1-5" or internal state
+        if self.selected_mode > 0:
+            display_mode = f"Mode {self.selected_mode}"
+        else:
+            display_mode = self.mode.value
+        
         return {
             'logic': 'A',
-            'mode': self.mode.value,
+            'mode': display_mode,
             'phase': self.cycle_phase.value if hasattr(self, 'cycle_phase') else 'idle',
             'position': self.position_description,
             'cycle_count': self.cycle_count,
             'selected_mode': self.selected_mode,
             'manual_mode': self.modo_manual,
-            'running': self.en_ejecucion,
+            'running': self.en_ejecucion,  # This is the execution running status
             'waiting': self.en_espera,
-            'active': self._running
+            'active': self._running  # This is the main thread running status
         }
     
     def cleanup(self):

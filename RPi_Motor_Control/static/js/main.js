@@ -81,12 +81,12 @@ function updateStatus(data) {
     updateCurrentLogicDisplay(selectedLogic);
   }
 
-  // Update active logic display in status section
+  // Update active logic display in status section (show selected logic, not execution state)
   const activeLogic =
-    data.active_logic === "logic_a"
-      ? "A"
-      : data.active_logic === "logic_b"
-      ? "B"
+    data.selected_logic === "logic_a"
+      ? "Logic A"
+      : data.selected_logic === "logic_b"
+      ? "Logic B"
       : "None";
   document.getElementById("active-logic").textContent = activeLogic;
 
@@ -200,6 +200,18 @@ function selectLogic(logic) {
         document
           .getElementById(`logic-${logic.toLowerCase()}-btn`)
           .classList.add("selected");
+        
+        // Automatically start the logic thread so it's ready to receive button presses
+        fetch("/api/start", { method: "POST" })
+          .then((res) => res.json())
+          .then((startData) => {
+            if (startData.success) {
+              console.log("Logic thread started");
+            } else {
+              // Logic might already be running, that's okay
+              console.log("Logic thread status:", startData.error);
+            }
+          });
       } else {
         showNotification(data.error || "Failed to select logic", "error");
       }
@@ -258,43 +270,38 @@ function startExecution() {
     return;
   }
 
-  if (!confirm("Start execution?")) {
-    return;
-  }
-
-  fetch("/api/start", { method: "POST" })
+  // The Start button simulates pressing the physical Start button
+  // This allows the logic's _handle_waiting_mode() to detect it
+  fetch("/api/button/start", { method: "POST" })
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        showNotification("Execution started", "success");
+        showNotification("Start button pressed", "success");
       } else {
-        showNotification(data.error || "Failed to start", "error");
+        showNotification(data.error || "Failed to press start button", "error");
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      showNotification("Error starting execution", "error");
+      showNotification("Error pressing start button", "error");
     });
 }
 
 // Stop execution
 function stopExecution() {
-  if (!confirm("Stop execution?")) {
-    return;
-  }
-
-  fetch("/api/stop", { method: "POST" })
+  // The Stop button simulates pressing the physical Stop button
+  fetch("/api/button/stop", { method: "POST" })
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        showNotification("Execution stopped", "success");
+        showNotification("Stop button pressed", "success");
       } else {
-        showNotification(data.error || "Failed to stop", "warning");
+        showNotification(data.error || "Failed to press stop button", "warning");
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      showNotification("Error stopping execution", "error");
+      showNotification("Error pressing stop button", "error");
     });
 }
 
