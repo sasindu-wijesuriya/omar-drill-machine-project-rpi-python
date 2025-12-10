@@ -1,6 +1,6 @@
 {
   "system": {
-    "simulation_mode": true,
+    "simulation_mode": false,
     "debug_mode": true,
     "log_level": "INFO"
   },

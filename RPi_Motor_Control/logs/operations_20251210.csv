@@ -201,3 +201,8 @@ Timestamp,Logic,Mode,Operation,Status,Cycle_Count,Position,Details
 2025-12-10 18:23:53.518,A,System,BulkConfigUpdate,Success,0,,"Updated 8 parameters, saved to /home/ubuntu/omar-drill-machine-project-rpi-python/RPi_Motor_Control/config/config_logic_a.json"
 2025-12-10 18:24:02.065,System,Emergency,EmergencyStop,Completed,0,,
 2025-12-10 18:24:02.080,A,System,BulkConfigUpdate,Success,0,,"Updated 7 parameters, saved to /home/ubuntu/omar-drill-machine-project-rpi-python/RPi_Motor_Control/config/config_logic_a.json"
+2025-12-10 18:55:02.878,System,Emergency,EmergencyStop,Completed,0,,
+2025-12-10 18:55:02.933,System,Shutdown,Cleanup,Success,0,,
+2025-12-10 18:55:02.948,System,Emergency,EmergencyStop,Completed,0,,
+2025-12-10 18:55:02.969,System,Shutdown,Cleanup,Success,0,,
+2025-12-10 18:55:26.962,System,Startup,Initialize,Success,0,,
