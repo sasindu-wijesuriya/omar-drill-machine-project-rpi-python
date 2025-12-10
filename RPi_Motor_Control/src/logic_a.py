@@ -186,6 +186,12 @@ class LogicA:
             
             self._running = False
             
+            # Reset state flags (emergency stop cleanup)
+            self.en_ejecucion = False
+            self.en_espera = False
+            self.modo_manual = False
+            self.mode = OperationMode.IDLE
+            
             # Stop all motors
             self.motor_linear.stop()
             self.motor_drill.stop()
@@ -632,14 +638,14 @@ class LogicA:
         self._update_status()
         
         # Step 1: Wait for safety switch to return to safe state
-        while not self.switch_s.is_triggered():
+        while not self.switch_s.is_triggered() and self._running:
             time.sleep(0.05)
         
         logger.info("✓ Safety switch is now HIGH (safe)")
         logger.warning("⏸️  Step 2: Waiting for Start button press to resume...")
         
         # Step 2: Wait for start button press
-        while True:
+        while self._running:
             if self.btn_start.check_rising_edge():
                 logger.info("✓ Start button pressed - resuming operation")
                 # Restore running state
@@ -753,7 +759,7 @@ class LogicA:
         start_time = time.time()
         elapsed = 0
         
-        while elapsed < (delay_ms / 1000):
+        while self._running and elapsed < (delay_ms / 1000):
             # Check for stop/safety conditions
             if not self.switch_s.is_triggered():
                 logger.warning("⚠️  Safety triggered during initial delay")
@@ -778,6 +784,11 @@ class LogicA:
             time.sleep(velocidad_taladro / 1_000_000)
             
             elapsed = time.time() - start_time
+        
+        # Check if we exited due to emergency stop
+        if not self._running:
+            logger.warning("⚠️  Initial delay interrupted by emergency stop")
+            return False
         
         logger.info("✓ Initial delay complete")
         return True
@@ -816,7 +827,7 @@ class LogicA:
         estado_pulso_lineal = False
         estado_pulso_taladro = False
         
-        while True:
+        while self._running:
             current_time = time.time()
             
             # Check safety and stop conditions
@@ -894,6 +905,11 @@ class LogicA:
         self.motor_linear.stop()
         self.motor_drill.stop()
         
+        # Check if we exited due to emergency stop
+        if not self._running:
+            logger.warning("⚠️  Cycle 1 interrupted by emergency stop")
+            return False
+        
         logger.info("✓ Cycle 1 complete")
         self.csv_logger.log_operation("A", "Auto", "Cycle1", "Completed", cycle_count=vueltas)
         return True
@@ -918,7 +934,7 @@ class LogicA:
         last_time = time.time()
         estado_pulso = False
         
-        while conteo_pulsos < (pasos * 2):  # *2 because we count rising and falling edges
+        while self._running and conteo_pulsos < (pasos * 2):  # *2 because we count rising and falling edges
             current_time = time.time()
             
             # Check safety and stop conditions
@@ -948,6 +964,12 @@ class LogicA:
                 conteo_pulsos += 1
         
         self.motor_linear.stop()
+        
+        # Check if we exited due to emergency stop
+        if not self._running:
+            logger.warning("⚠️  Intermediate positioning interrupted by emergency stop")
+            return False
+        
         logger.info("✓ Intermediate positioning complete")
         return True
     
@@ -984,7 +1006,7 @@ class LogicA:
         last_time = time.time()
         estado_pulso = False
         
-        while True:
+        while self._running:
             current_time = time.time()
             
             # Check safety and stop conditions
@@ -1053,6 +1075,12 @@ class LogicA:
                 logger.info("  ✓ Target cycles reached - finishing current pass")
         
         self.motor_linear.stop()
+        
+        # Check if we exited due to emergency stop
+        if not self._running:
+            logger.warning("⚠️  Cycle 2 interrupted by emergency stop")
+            return False
+        
         logger.info("✓ Cycle 2 complete")
         self.csv_logger.log_operation("A", "Auto", "Cycle2", "Completed")
         return True
