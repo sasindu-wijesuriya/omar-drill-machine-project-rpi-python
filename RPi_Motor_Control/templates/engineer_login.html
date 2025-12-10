@@ -61,9 +61,10 @@
             const data = await response.json();
 
             if (data.success) {
-              window.location.href = "/engineer";
+              // Redirect to engineer dashboard
+              window.location.href = data.redirect || "/engineer/dashboard";
             } else {
-              errorDiv.textContent = data.message || "Invalid password";
+              errorDiv.textContent = data.error || "Invalid password";
               errorDiv.style.display = "block";
               document.getElementById("password").value = "";
             }

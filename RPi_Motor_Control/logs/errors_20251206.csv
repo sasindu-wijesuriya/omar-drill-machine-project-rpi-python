@@ -2,3 +2,7 @@ Timestamp,Logic,Error_Type,Error_Message,Stack_Trace,System_State
 2025-12-06 00:21:15.683,System,Startup,module 'eventlet.green.thread' has no attribute 'start_joinable_thread',,
 2025-12-06 00:22:05.047,System,Startup,Invalid async_mode specified,,
 2025-12-06 19:10:06.869,System,Startup,module 'pigpio' has no attribute 'ALT0',,
+2025-12-06 15:51:36.765,System,Runtime,The Werkzeug web server is not designed to run in production. Pass allow_unsafe_werkzeug=True to the run() method to disable this error.,,
+2025-12-06 19:09:40.740,System,Startup,name '_require_auth' is not defined,,
+2025-12-06 19:09:51.297,System,Startup,name '_require_auth' is not defined,,
+2025-12-06 19:10:04.271,System,Startup,name '_require_auth' is not defined,,

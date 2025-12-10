@@ -8,57 +8,142 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
     />
+    <style>
+      .param-section {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f5f5f5;
+        border-radius: 8px;
+      }
+      .param-section h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+      }
+      .param-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+      }
+      .param-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .param-item label {
+        font-weight: 600;
+        color: #34495e;
+        font-size: 14px;
+      }
+      .param-item input {
+        padding: 8px;
+        border: 1px solid #bdc3c7;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      .param-item input:focus {
+        border-color: #3498db;
+        outline: none;
+      }
+      .mode-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .mode-tab {
+        padding: 10px 20px;
+        background: #ecf0f1;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+      .mode-tab:hover {
+        background: #bdc3c7;
+      }
+      .mode-tab.active {
+        background: #3498db;
+        color: white;
+      }
+      .logic-selector {
+        margin: 20px 0;
+      }
+      .logic-btn-group {
+        display: flex;
+        gap: 10px;
+      }
+      .logic-btn-group button {
+        flex: 1;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .warning-box {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .warning-box strong {
+        color: #856404;
+      }
+      .save-section {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 20px;
+        border-top: 2px solid #3498db;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+      }
+      .readonly-info {
+        background: #e8f4f8;
+        padding: 10px;
+        border-left: 4px solid #3498db;
+        margin: 10px 0;
+        font-size: 14px;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
       <div class="header">
-        <h1>🔧 Engineer Menu</h1>
+        <h1>🔧 Engineer Menu - Parameter Configuration</h1>
         <div class="header-actions">
           <a href="/" class="btn btn-secondary">Back to Dashboard</a>
           <button id="logoutBtn" class="btn btn-danger">Logout</button>
         </div>
       </div>
 
-      <div class="card">
-        <h2>Configuration Editor</h2>
-        <p class="warning">
-          ⚠️ Warning: Changes will take effect immediately. Only modify if you
-          know what you're doing.
-        </p>
-
-        <div class="config-selector">
-          <label for="configType">Select Configuration:</label>
-          <select id="configType" class="form-control">
-            <option value="logic_a">Logic A Configuration</option>
-            <option value="logic_b">Logic B Configuration</option>
-            <option value="system">System Configuration</option>
-          </select>
-        </div>
-
-        <div id="configEditor">
-          <textarea
-            id="configJson"
-            rows="20"
-            class="config-textarea"
-            placeholder="Loading configuration..."
-          ></textarea>
-        </div>
-
-        <div class="button-group">
-          <button id="loadBtn" class="btn btn-primary">
-            Load Configuration
-          </button>
-          <button id="saveBtn" class="btn btn-success">Save Changes</button>
-          <button id="resetBtn" class="btn btn-warning">
-            Reset to Original
-          </button>
-        </div>
-
-        <div id="message" class="message" style="display: none"></div>
+      <div class="warning-box">
+        <strong>⚠️ Important:</strong> Changing parameters will stop any running execution. 
+        The system will reload configurations after saving. Make sure to test new values carefully.
       </div>
 
+      <!-- Logic Selector -->
       <div class="card">
-        <h2>System Information</h2>
+        <h2>Select Logic to Configure</h2>
+        <p style="color: #7f8c8d; margin-bottom: 15px;">Choose which logic to load and configure:</p>
+        <div class="logic-selector">
+          <div class="logic-btn-group">
+            <button id="logicABtn" class="btn btn-primary" onclick="selectLogic('A')">
+              Logic A (CG4n51_L1)
+            </button>
+            <button id="logicBBtn" class="btn btn-primary" onclick="selectLogic('B')">
+              Logic B (CG4n51_L2)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Status -->
+      <div class="card">
+        <h2>System Status</h2>
         <div class="info-grid">
           <div class="info-item">
             <strong>Current Logic:</strong>
@@ -69,127 +154,372 @@
             <span id="currentMode">-</span>
           </div>
           <div class="info-item">
-            <strong>System State:</strong>
-            <span id="systemState">-</span>
+            <strong>Running:</strong>
+            <span id="runningStatus">-</span>
           </div>
           <div class="info-item">
-            <strong>Hardware Mode:</strong>
-            <span id="hardwareMode"
-              >{{ 'SIMULATION' if simulate else 'REAL HARDWARE' }}</span
-            >
+            <strong>Hardware:</strong>
+            <span>{{ 'SIMULATION' if simulate else 'REAL HARDWARE' }}</span>
           </div>
         </div>
+      </div>
+
+      <!-- Parameter Editor -->
+      <div class="card" id="parameterCard" style="display: none;">
+        <h2 id="configTitle">Mode Parameters</h2>
+        
+        <div class="readonly-info">
+          <strong>ℹ️ Note:</strong> Pin configurations and motor parameters are fixed. 
+          Only speeds, steps, and cycle parameters can be modified per mode.
+        </div>
+
+        <!-- Mode Tabs -->
+        <div class="mode-tabs">
+          <button class="mode-tab active" onclick="selectMode(1)">Mode 1</button>
+          <button class="mode-tab" onclick="selectMode(2)">Mode 2</button>
+          <button class="mode-tab" onclick="selectMode(3)">Mode 3</button>
+          <button class="mode-tab" onclick="selectMode(4)">Mode 4</button>
+          <button class="mode-tab" onclick="selectMode(5)">Mode 5</button>
+          <button class="mode-tab" onclick="selectMode('common')">Common Settings</button>
+        </div>
+
+        <!-- Parameters Container -->
+        <div id="parametersContainer">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Save Section -->
+      <div class="save-section" id="saveSection" style="display: none;">
+        <div class="button-group">
+          <button id="saveBtn" class="btn btn-success" onclick="saveConfiguration()">
+            💾 Save All Changes
+          </button>
+          <button id="reloadBtn" class="btn btn-warning" onclick="reloadConfiguration()">
+            🔄 Reload from File
+          </button>
+        </div>
+        <div id="message" class="message" style="display: none; margin-top: 10px;"></div>
       </div>
     </div>
 
     <script>
-      let originalConfig = "";
+      let currentLogic = null;
+      let currentModeView = 1;
+      let configData = null;
 
-      document.getElementById("loadBtn").addEventListener("click", loadConfig);
-      document.getElementById("saveBtn").addEventListener("click", saveConfig);
-      document
-        .getElementById("resetBtn")
-        .addEventListener("click", resetConfig);
-      document.getElementById("logoutBtn").addEventListener("click", logout);
-
-      async function loadConfig() {
-        const configType = document.getElementById("configType").value;
-        const messageDiv = document.getElementById("message");
-
+      // Load page on DOMContentLoaded
+      window.addEventListener('DOMContentLoaded', () => {
+        startStatusPolling();
+        
+        // Setup logout button
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+      });
+      
+      async function logout() {
         try {
-          const response = await fetch(`/api/config/${configType}`);
-          const data = await response.json();
-
-          if (data.success) {
-            originalConfig = JSON.stringify(data.config, null, 2);
-            document.getElementById("configJson").value = originalConfig;
-            showMessage("Configuration loaded successfully", "success");
-          } else {
-            showMessage(
-              "Failed to load configuration: " + data.message,
-              "error"
-            );
-          }
+          await fetch('/api/engineer/logout', { method: 'POST' });
         } catch (error) {
-          showMessage("Error loading configuration: " + error.message, "error");
+          console.error('Logout error:', error);
+        } finally {
+          // Always redirect to engineer login page
+          window.location.href = '/engineer';
         }
       }
 
-      async function saveConfig() {
-        const configType = document.getElementById("configType").value;
-        const configText = document.getElementById("configJson").value;
+      async function selectLogic(logic) {
+        currentLogic = logic;
+        document.getElementById('logicABtn').classList.toggle('active', logic === 'A');
+        document.getElementById('logicBBtn').classList.toggle('active', logic === 'B');
+        
+        // Show loading message
+        showMessage(`Loading Logic ${logic} configuration...`, 'info');
+        
+        // Load configuration
+        await loadConfiguration();
+      }
+
+      function selectMode(mode) {
+        currentModeView = mode;
+        document.querySelectorAll('.mode-tab').forEach((tab, idx) => {
+          tab.classList.toggle('active', 
+            (mode === 'common' && idx === 5) || (mode === idx + 1)
+          );
+        });
+        renderParameters();
+      }
+
+      async function loadConfiguration() {
+        if (!currentLogic) {
+          showMessage('Please select a logic first', 'warning');
+          return;
+        }
+        
+        try {
+          // Use uppercase A or B for the API endpoint
+          const response = await fetch(`/api/config/${currentLogic}`);
+          
+          if (response.status === 401) {
+            // Not authenticated, redirect to login
+            window.location.href = '/engineer';
+            return;
+          }
+          
+          const data = await response.json();
+
+          if (data.success) {
+            configData = data.config;
+            document.getElementById('configTitle').textContent = 
+              `${configData.logic_name || 'Logic ' + currentLogic} - Mode Parameters`;
+            
+            // Show parameter editor and save section
+            document.getElementById('parameterCard').style.display = 'block';
+            document.getElementById('saveSection').style.display = 'block';
+            
+            renderParameters();
+            showMessage('Configuration loaded successfully', 'success');
+          } else {
+            showMessage('Failed to load configuration: ' + (data.error || 'Unknown error'), 'error');
+          }
+        } catch (error) {
+          console.error('Load config error:', error);
+          showMessage('Error loading configuration: ' + error.message, 'error');
+        }
+      }
+
+      async function reloadConfiguration() {
+        if (!currentLogic) {
+          showMessage('Please select a logic first', 'warning');
+          return;
+        }
+        if (confirm('Reload configuration from file? Unsaved changes will be lost.')) {
+          await loadConfiguration();
+        }
+      }
+
+      function renderParameters() {
+        if (!configData) return;
+
+        const container = document.getElementById('parametersContainer');
+        container.innerHTML = '';
+
+        if (currentModeView === 'common') {
+          renderCommonSettings(container);
+        } else {
+          renderModeSettings(container, currentModeView);
+        }
+      }
+
+      function renderCommonSettings(container) {
+        // Common settings that apply to all modes
+        
+        // Home position settings
+        const homeSection = createSection('Home Position Settings');
+        addParameter(homeSection, 'pasos_home.pasos_despues_home', 
+          'Steps After Home', configData.pasos_home?.pasos_despues_home || 425);
+        container.appendChild(homeSection);
+
+        // Time settings
+        const timeSection = createSection('Timing Settings');
+        addParameter(timeSection, 'tiempos.tiempo_antes_de_girar_ms',
+          'Delay Before Rotation (ms)', configData.tiempos?.tiempo_antes_de_girar_ms || 2000);
+        addParameter(timeSection, 'tiempos.tiempo_para_empezar_despues_stop_ms',
+          'Delay After Stop (ms)', configData.tiempos?.tiempo_para_empezar_despues_stop_ms || 2000);
+        container.appendChild(timeSection);
+
+        // Cycle 2 settings
+        const cycle2Section = createSection('Cycle 2 Settings (Drill)');
+        addParameter(cycle2Section, 'velocidades_ciclo2.velocidad_pasos_taladro_ciclo2',
+          'Drill Speed (Cycle 2)', configData.velocidades_ciclo2?.velocidad_pasos_taladro_ciclo2 || 2200);
+        addParameter(cycle2Section, 'velocidades_ciclo2.pasos_taladro_ciclo2',
+          'Drill Steps (Cycle 2)', configData.velocidades_ciclo2?.pasos_taladro_ciclo2 || 200);
+        addParameter(cycle2Section, 'velocidades_ciclo2.cantidad_giros_taladro_ciclo2',
+          'Drill Rotations (Cycle 2)', configData.velocidades_ciclo2?.cantidad_giros_taladro_ciclo2 || 3);
+        container.appendChild(cycle2Section);
+
+        // Manual mode settings
+        const manualSection = createSection('Manual Mode Settings');
+        addParameter(manualSection, 'velocidades_manual.limite_inferior',
+          'Min Speed Limit', configData.velocidades_manual?.limite_inferior || 1500);
+        addParameter(manualSection, 'velocidades_manual.limite_superior',
+          'Max Speed Limit', configData.velocidades_manual?.limite_superior || 2500);
+        container.appendChild(manualSection);
+      }
+
+      function renderModeSettings(container, modeNum) {
+        const modeKey = `nivel${modeNum}`;
+
+        // Linear speed
+        const speedLinearSection = createSection(`Mode ${modeNum} - Linear Speed`);
+        addParameter(speedLinearSection, `velocidades_lineal.${modeKey}`,
+          'Linear Motor Speed', configData.velocidades_lineal?.[modeKey] || 3000);
+        container.appendChild(speedLinearSection);
+
+        // Drill speed
+        const speedDrillSection = createSection(`Mode ${modeNum} - Drill Speed`);
+        addParameter(speedDrillSection, `velocidades_taladro.${modeKey}`,
+          'Drill Motor Speed', configData.velocidades_taladro?.[modeKey] || 2200);
+        container.appendChild(speedDrillSection);
+
+        // Steps - Level 1
+        const stepsLevel1Section = createSection(`Mode ${modeNum} - Level 1 Steps`);
+        addParameter(stepsLevel1Section, `pasos_primer_nivel.${modeKey}`,
+          'Steps (Level 1)', configData.pasos_primer_nivel?.[modeKey] || 175);
+        container.appendChild(stepsLevel1Section);
+
+        // Steps - Level 2
+        const stepsLevel2Section = createSection(`Mode ${modeNum} - Level 2 Steps`);
+        addParameter(stepsLevel2Section, `pasos_acomodo_segundo_nivel.${modeKey}`,
+          'Adjustment Steps (Level 2)', configData.pasos_acomodo_segundo_nivel?.[modeKey] || 175);
+        addParameter(stepsLevel2Section, `pasos_segundo_nivel.${modeKey}`,
+          'Steps (Level 2)', configData.pasos_segundo_nivel?.[modeKey] || 225);
+        container.appendChild(stepsLevel2Section);
+
+        // Rotations
+        const rotationsSection = createSection(`Mode ${modeNum} - Drill Rotations`);
+        addParameter(rotationsSection, `vueltas_primer_nivel.${modeKey}`,
+          'Rotations (Level 1)', configData.vueltas_primer_nivel?.[modeKey] || 100);
+        addParameter(rotationsSection, `vueltas_segundo_nivel.${modeKey}`,
+          'Rotations (Level 2)', configData.vueltas_segundo_nivel?.[modeKey] || 1000);
+        container.appendChild(rotationsSection);
+      }
+
+      function createSection(title) {
+        const section = document.createElement('div');
+        section.className = 'param-section';
+        
+        const heading = document.createElement('h3');
+        heading.textContent = title;
+        section.appendChild(heading);
+        
+        const grid = document.createElement('div');
+        grid.className = 'param-grid';
+        section.appendChild(grid);
+        
+        return section;
+      }
+
+      function addParameter(section, path, label, value) {
+        const grid = section.querySelector('.param-grid');
+        
+        const item = document.createElement('div');
+        item.className = 'param-item';
+        
+        const labelEl = document.createElement('label');
+        labelEl.textContent = label;
+        labelEl.setAttribute('for', path);
+        
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = path;
+        input.value = value;
+        input.dataset.path = path;
+        
+        item.appendChild(labelEl);
+        item.appendChild(input);
+        grid.appendChild(item);
+      }
+
+      async function saveConfiguration() {
+        if (!currentLogic) {
+          showMessage('Please select a logic first', 'warning');
+          return;
+        }
+        
+        if (!configData) {
+          showMessage('No configuration loaded', 'error');
+          return;
+        }
+
+        if (!confirm('Save configuration? This will stop any running execution and reload the system.')) {
+          return;
+        }
 
         try {
-          const config = JSON.parse(configText);
+          // Collect all modified values into parameters object
+          const parameters = {};
+          const inputs = document.querySelectorAll('input[data-path]');
+          inputs.forEach(input => {
+            const path = input.dataset.path;
+            const value = parseFloat(input.value) || 0;
+            parameters[path] = value;
+          });
 
-          const response = await fetch(`/api/config/${configType}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ config }),
+          // Save all parameters (includes emergency stop)
+          const response = await fetch('/api/config/save-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              logic: currentLogic,
+              parameters: parameters
+            })
           });
 
           const data = await response.json();
 
           if (data.success) {
-            originalConfig = configText;
-            showMessage("Configuration saved successfully", "success");
+            showMessage('✅ ' + data.message, 'success');
+            
+            // Reload the configuration to show saved values
+            setTimeout(() => {
+              loadConfiguration();
+            }, 1500);
           } else {
-            showMessage("Failed to save: " + data.message, "error");
+            showMessage('❌ Failed to save: ' + (data.error || 'Unknown error'), 'error');
           }
         } catch (error) {
-          showMessage("Error: " + error.message, "error");
+          console.error('Save error:', error);
+          showMessage('❌ Error: ' + error.message, 'error');
         }
       }
 
-      function resetConfig() {
-        if (originalConfig) {
-          document.getElementById("configJson").value = originalConfig;
-          showMessage("Configuration reset to original", "info");
+      function setNestedValue(obj, path, value) {
+        const keys = path.split('.');
+        let current = obj;
+        
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (!current[keys[i]]) {
+            current[keys[i]] = {};
+          }
+          current = current[keys[i]];
         }
-      }
-
-      async function logout() {
-        try {
-          await fetch("/api/engineer/logout", { method: "POST" });
-          window.location.href = "/";
-        } catch (error) {
-          console.error("Logout error:", error);
-          window.location.href = "/";
-        }
+        
+        current[keys[keys.length - 1]] = value;
       }
 
       function showMessage(text, type) {
-        const messageDiv = document.getElementById("message");
+        const messageDiv = document.getElementById('message');
         messageDiv.textContent = text;
-        messageDiv.className = "message " + type;
-        messageDiv.style.display = "block";
+        messageDiv.className = 'message ' + type;
+        messageDiv.style.display = 'block';
 
         setTimeout(() => {
-          messageDiv.style.display = "none";
+          messageDiv.style.display = 'none';
         }, 5000);
       }
 
-      // Load default config on page load
-      loadConfig();
+      function startStatusPolling() {
+        setInterval(async () => {
+          try {
+            const response = await fetch('/api/status');
+            const status = await response.json();
 
-      // Auto-refresh status
-      setInterval(async () => {
-        try {
-          const response = await fetch("/api/status");
-          const status = await response.json();
-
-          document.getElementById("currentLogic").textContent =
-            status.selected_logic || "None";
-          document.getElementById("currentMode").textContent =
-            status.selected_mode || "None";
-          document.getElementById("systemState").textContent =
-            status.state || "Unknown";
-        } catch (error) {
-          console.error("Status update error:", error);
-        }
-      }, 1000);
+            const logicStatus = status.logic_a_status || status.logic_b_status;
+            
+            document.getElementById('currentLogic').textContent =
+              status.selected_logic === 'logic_a' ? 'Logic A' :
+              status.selected_logic === 'logic_b' ? 'Logic B' : 'None';
+            
+            document.getElementById('currentMode').textContent =
+              logicStatus?.mode || 'None';
+            
+            document.getElementById('runningStatus').textContent =
+              logicStatus?.running ? 'Yes' : 'No';
+          } catch (error) {
+            console.error('Status poll error:', error);
+          }
+        }, 1000);
+      }
     </script>
   </body>
 </html>

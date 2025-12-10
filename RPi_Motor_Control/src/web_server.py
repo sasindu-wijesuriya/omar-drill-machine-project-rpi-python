@@ -21,16 +21,18 @@ logger = logging.getLogger(__name__)
 class WebServer:
     """Flask web server with SocketIO for real-time updates"""
     
-    def __init__(self, execution_manager: ExecutionManager, config: Dict[str, Any]):
+    def __init__(self, execution_manager: ExecutionManager, config: Dict[str, Any], gpio_monitor=None):
         """
         Initialize web server
         
         Args:
             execution_manager: Execution manager instance
             config: Web server configuration
+            gpio_monitor: GPIO monitor instance (optional)
         """
         self.execution_manager = execution_manager
         self.config = config
+        self.gpio_monitor = gpio_monitor
         
         # Create Flask app
         template_dir = Path(__file__).parent.parent / 'templates'
@@ -72,17 +74,28 @@ class WebServer:
         def index():
             return render_template('index.html')
         
-        # Engineer menu page
+        # Engineer menu login page
         @self.app.route('/engineer')
         def engineer():
+            # Always show login page
+            return render_template('engineer_login.html')
+        
+        # Engineer menu authenticated page
+        @self.app.route('/engineer/dashboard')
+        def engineer_dashboard():
             if not session.get('engineer_authenticated'):
                 return render_template('engineer_login.html')
-            return render_template('engineer.html')
+            return render_template('engineer.html', simulate=self.execution_manager.hw.simulate)
         
         # Logs page
         @self.app.route('/logs')
         def logs():
             return render_template('logs.html')
+        
+        # GPIO Monitor page
+        @self.app.route('/gpio')
+        def gpio_monitor_page():
+            return render_template('gpio_monitor.html')
         
         # API: Get system status
         @self.app.route('/api/status', methods=['GET'])
@@ -97,6 +110,12 @@ class WebServer:
         # API: Select logic (A or B)
         @self.app.route('/api/select_logic', methods=['POST'])
         def select_logic():
+            """
+            Select and start a logic (A or B)
+            - Stops any running logic
+            - Resets hardware
+            - Starts the new logic thread
+            """
             try:
                 data = request.get_json()
                 logic = data.get('logic', '').upper()
@@ -104,12 +123,17 @@ class WebServer:
                 if logic not in ['A', 'B']:
                     return jsonify({'error': 'Invalid logic (must be A or B)'}), 400
                 
+                # Select logic (this now auto-stops previous logic, resets hardware, and starts new logic)
                 success = self.execution_manager.select_logic(logic)
                 
                 if success:
-                    return jsonify({'success': True, 'message': f'Logic {logic} selected'})
+                    return jsonify({
+                        'success': True, 
+                        'message': f'Logic {logic} selected and started',
+                        'status': 'running'
+                    })
                 else:
-                    return jsonify({'error': 'Failed to select logic'}), 400
+                    return jsonify({'error': 'Failed to select and start logic'}), 400
             except Exception as e:
                 logger.error(f"Select logic error: {e}")
                 return jsonify({'error': str(e)}), 500
@@ -137,20 +161,58 @@ class WebServer:
         # API: Start execution
         @self.app.route('/api/start', methods=['POST'])
         def start_execution():
+            """
+            DEPRECATED: Logic auto-starts when selected.
+            This endpoint is kept for backward compatibility.
+            """
             try:
                 success = self.execution_manager.start_selected_logic()
                 
                 if success:
-                    return jsonify({'success': True, 'message': 'Execution started'})
+                    return jsonify({
+                        'success': True, 
+                        'message': 'Logic thread already running or started',
+                        'deprecated': True,
+                        'info': 'Logic auto-starts when selected. This endpoint is no longer needed.'
+                    })
                 else:
-                    return jsonify({'error': 'Failed to start execution'}), 400
+                    return jsonify({
+                        'error': 'No logic selected or failed to start',
+                        'info': 'Use /api/select_logic to select and start a logic'
+                    }), 400
             except Exception as e:
                 logger.error(f"Start error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: Simulate button press (for web interface control)
+        @self.app.route('/api/button/<button_name>', methods=['POST'])
+        def press_button(button_name):
+            """Simulate a physical button press"""
+            try:
+                # Valid button names: start, stop, reset, tala
+                valid_buttons = ['start', 'stop', 'reset', 'tala']
+                if button_name not in valid_buttons:
+                    return jsonify({'error': f'Invalid button name. Valid: {valid_buttons}'}), 400
+                
+                # Simulate button press and release
+                hw = self.execution_manager.hw
+                hw.simulate_button_press(button_name)
+                # Auto-release after 100ms
+                import time, threading
+                def release_button():
+                    time.sleep(0.1)
+                    hw.simulate_button_release(button_name)
+                threading.Thread(target=release_button, daemon=True).start()
+                
+                return jsonify({'success': True, 'message': f'{button_name.capitalize()} button pressed'})
+            except Exception as e:
+                logger.error(f"Button press error: {e}")
                 return jsonify({'error': str(e)}), 500
         
         # API: Stop execution
         @self.app.route('/api/stop', methods=['POST'])
         def stop_execution():
+            """Stop the logic thread"""
             try:
                 success = self.execution_manager.stop_active_logic()
                 
@@ -207,14 +269,15 @@ class WebServer:
                 data = request.get_json()
                 password = data.get('password', '')
                 
-                if password == self.config.get('engineer_password', '1234'):
+                if password == self.config.get('engineer_password', 'engineer123'):
                     session['engineer_authenticated'] = True
-                    return jsonify({'success': True, 'message': 'Authentication successful'})
+                    session.permanent = True  # Keep session active
+                    return jsonify({'success': True, 'message': 'Logged in', 'redirect': '/engineer/dashboard'})
                 else:
-                    return jsonify({'error': 'Invalid password'}), 401
+                    return jsonify({'success': False, 'error': 'Invalid password'}), 401
             except Exception as e:
                 logger.error(f"Login error: {e}")
-                return jsonify({'error': str(e)}), 500
+                return jsonify({'success': False, 'error': str(e)}), 500
         
         # API: Engineer logout
         @self.app.route('/api/engineer/logout', methods=['POST'])
@@ -230,12 +293,12 @@ class WebServer:
                 config = self.execution_manager.get_configuration(logic.upper())
                 
                 if config:
-                    return jsonify(config)
+                    return jsonify({'success': True, 'config': config})
                 else:
-                    return jsonify({'error': 'Invalid logic'}), 400
+                    return jsonify({'success': False, 'error': 'Invalid logic'}), 400
             except Exception as e:
                 logger.error(f"Get config error: {e}")
-                return jsonify({'error': str(e)}), 500
+                return jsonify({'success': False, 'error': str(e)}), 500
         
         # API: Update parameter
         @self.app.route('/api/config/update', methods=['POST'])
@@ -258,6 +321,168 @@ class WebServer:
                     return jsonify({'error': 'Failed to update parameter'}), 400
             except Exception as e:
                 logger.error(f"Update parameter error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: Save configuration
+        @self.app.route('/api/config/save', methods=['POST'])
+        @self._require_auth
+        def save_configuration():
+            try:
+                data = request.get_json()
+                logic = data.get('logic', '').upper()
+                
+                if not logic:
+                    return jsonify({'error': 'Missing logic'}), 400
+                
+                success = self.execution_manager.save_configuration(logic)
+                
+                if success:
+                    return jsonify({
+                        'success': True, 
+                        'message': f'Configuration for Logic {logic} saved successfully. System stopped - please select logic to restart.'
+                    })
+                else:
+                    return jsonify({'error': 'Failed to save configuration'}), 400
+            except Exception as e:
+                logger.error(f"Save configuration error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: Update and save configuration (bulk update)
+        @self.app.route('/api/config/save-all', methods=['POST'])
+        @self._require_auth
+        def save_all_configuration():
+            try:
+                data = request.get_json()
+                logic = data.get('logic', '').upper()
+                parameters = data.get('parameters', {})
+                
+                if not logic or not parameters:
+                    return jsonify({'error': 'Missing logic or parameters'}), 400
+                
+                success = self.execution_manager.update_and_save_configuration(logic, parameters)
+                
+                if success:
+                    return jsonify({
+                        'success': True, 
+                        'message': f'All parameters saved successfully for Logic {logic}. System stopped - please select logic to restart.'
+                    })
+                else:
+                    return jsonify({'error': 'Some parameters failed to update'}), 400
+            except Exception as e:
+                logger.error(f"Save all configuration error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Get all pins status
+        @self.app.route('/api/gpio/status', methods=['GET'])
+        def get_gpio_status():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                pins = self.gpio_monitor.get_all_pins_status()
+                return jsonify({'pins': pins})
+            except Exception as e:
+                logger.error(f"GPIO status error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Get pin groups
+        @self.app.route('/api/gpio/groups', methods=['GET'])
+        def get_gpio_groups():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                groups = self.gpio_monitor.get_pin_groups()
+                return jsonify(groups)
+            except Exception as e:
+                logger.error(f"GPIO groups error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Get specific pin status
+        @self.app.route('/api/gpio/pin/<int:pin>', methods=['GET'])
+        def get_pin_status(pin):
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                status = self.gpio_monitor.get_pin_status(pin)
+                if status:
+                    return jsonify(status)
+                else:
+                    return jsonify({'error': 'Pin not found'}), 404
+            except Exception as e:
+                logger.error(f"Pin status error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Write to pin
+        @self.app.route('/api/gpio/write', methods=['POST'])
+        def write_gpio_pin():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                data = request.get_json()
+                pin = data.get('pin')
+                value = data.get('value')
+                
+                if pin is None or value is None:
+                    return jsonify({'error': 'Missing pin or value'}), 400
+                
+                result = self.gpio_monitor.write_pin(int(pin), int(value))
+                
+                # Broadcast GPIO update via websocket
+                if result.get('success'):
+                    self.socketio.emit('gpio_update', {
+                        'pin': pin,
+                        'value': value,
+                        'name': result.get('name', '')
+                    })
+                
+                return jsonify(result)
+            except Exception as e:
+                logger.error(f"GPIO write error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Simulate button press
+        @self.app.route('/api/gpio/button_press', methods=['POST'])
+        def simulate_button_press():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                data = request.get_json()
+                pin = data.get('pin')
+                duration = data.get('duration', 100)
+                
+                if pin is None:
+                    return jsonify({'error': 'Missing pin'}), 400
+                
+                result = self.gpio_monitor.simulate_button_press(int(pin), int(duration))
+                
+                # Broadcast button press via websocket
+                if result.get('success'):
+                    self.socketio.emit('button_pressed', {
+                        'pin': pin,
+                        'name': result.get('name', ''),
+                        'duration': duration
+                    })
+                
+                return jsonify(result)
+            except Exception as e:
+                logger.error(f"Button press simulation error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: GPIO Monitor - Get writable pins
+        @self.app.route('/api/gpio/writable', methods=['GET'])
+        def get_writable_pins():
+            try:
+                if not self.gpio_monitor:
+                    return jsonify({'error': 'GPIO monitor not available'}), 503
+                
+                pins = self.gpio_monitor.get_input_pins()
+                return jsonify({'pins': pins})
+            except Exception as e:
+                logger.error(f"Get writable pins error: {e}")
                 return jsonify({'error': str(e)}), 500
         
         # API: Get configuration by type
@@ -319,6 +544,27 @@ class WebServer:
                 return jsonify({'success': True, 'message': 'Configuration saved'})
             except Exception as e:
                 logger.error(f"Save config error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: Reload configuration
+        @self.app.route('/api/reload_config', methods=['POST'])
+        def reload_config():
+            try:
+                # Stop the current logic if running
+                if self.execution_manager.get_current_logic():
+                    self.execution_manager.stop_logic()
+                    time.sleep(0.5)  # Wait for clean stop
+                
+                # Reload the configuration by restarting the logic if one was selected
+                selected_logic = self.execution_manager.current_logic
+                if selected_logic:
+                    # Re-select the same logic to reload config
+                    self.execution_manager.select_logic(selected_logic)
+                    logger.info(f"Reloaded configuration for {selected_logic}")
+                
+                return jsonify({'success': True, 'message': 'Configuration reloaded'})
+            except Exception as e:
+                logger.error(f"Reload config error: {e}")
                 return jsonify({'error': str(e)}), 500
         
         # API: Get logs
@@ -479,7 +725,8 @@ class WebServer:
             host=host, 
             port=port, 
             debug=debug,
-            use_reloader=False
+            use_reloader=False,
+            allow_unsafe_werkzeug=True
         )
     
     def stop(self):
@@ -488,15 +735,16 @@ class WebServer:
         # SocketIO cleanup handled automatically
 
 
-def create_web_server(execution_manager: ExecutionManager, config: Dict[str, Any]) -> WebServer:
+def create_web_server(execution_manager: ExecutionManager, config: Dict[str, Any], gpio_monitor=None) -> WebServer:
     """
     Factory function to create web server
     
     Args:
         execution_manager: Execution manager instance
         config: Web server configuration
+        gpio_monitor: GPIO monitor instance (optional)
     
     Returns:
         WebServer instance
     """
-    return WebServer(execution_manager, config)
+    return WebServer(execution_manager, config, gpio_monitor)

@@ -179,7 +179,13 @@ class SimulatedHardwareInterface(HardwareInterface):
     
     def write(self, pin: int, value: int):
         """Write digital pin value"""
-        self._pin_values[pin] = value
+        # Update the appropriate simulation dictionary so read() returns the correct value
+        if pin in self._simulated_limits:
+            self._simulated_limits[pin] = value
+        elif pin in self._simulated_buttons:
+            self._simulated_buttons[pin] = value
+        else:
+            self._pin_values[pin] = value
         # Don't log every pulse (too verbose), only state changes
         # logger.debug(f"[SIM] Pin {pin} = {value}")
     
@@ -214,7 +220,7 @@ class SimulatedHardwareInterface(HardwareInterface):
         }
         if button_name in pin_map:
             pin = pin_map[button_name]
-            self._simulated_buttons[pin] = 1
+            self._simulated_buttons[pin] = 0
             logger.info(f"[SIM] Button '{button_name}' pressed (pin {pin})")
     
     def simulate_button_release(self, button_name: str):
@@ -225,9 +231,10 @@ class SimulatedHardwareInterface(HardwareInterface):
             'stop': 22,
             'tala': 5
         }
+        time.sleep(0.1)  # Debounce delay
         if button_name in pin_map:
             pin = pin_map[button_name]
-            self._simulated_buttons[pin] = 0
+            self._simulated_buttons[pin] = 1
             logger.info(f"[SIM] Button '{button_name}' released (pin {pin})")
     
     def simulate_limit_switch(self, switch_name: str, triggered: bool):

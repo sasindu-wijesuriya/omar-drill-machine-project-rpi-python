@@ -231,6 +231,74 @@ class LogicB(LogicA):
         
         self.csv_logger.log_operation("B", "System", "EmergencyStop", "RTCError")
     
+    def stop(self):
+        """Stop logic execution (overrides Logic A to add RTC cleanup)"""
+        with self._lock:
+            if not self._running:
+                return
+            
+            self._running = False
+            
+            # Reset state flags (emergency stop cleanup)
+            self.en_ejecucion = False
+            self.en_espera = False
+            self.modo_manual = False
+            self.mode = OperationMode.IDLE
+            # Note: Do NOT reset _date_lockout_active - lockout persists until logic restart
+            
+            # Stop all motors
+            self.motor_linear.stop()
+            self.motor_drill.stop()
+            self.nb_linear.disable()
+            self.nb_drill.disable()
+            
+            self.csv_logger.log_operation("B", self.mode.value, "Stop", "Stopped")
+            logger.info("Logic B stopped")
+    
+    def select_mode(self, mode_number: int):
+        """Select operation mode (overrides Logic A to add lockout check)"""
+        # Check for date lockout before mode selection
+        if self._date_lockout_active:
+            logger.error("❌ Cannot select mode - date lockout is active")
+            logger.error(f"   Target date has been reached: {self.rtc.get_date_string()}")
+            logger.error("   System is permanently locked")
+            return False
+        
+        # Check RTC validity
+        if not self.rtc.is_valid_date():
+            logger.error("❌ Cannot select mode - RTC has invalid date")
+            logger.error(f"   RTC year < 2000 detected: {self.rtc.get_date_string()}")
+            return False
+        
+        # Call parent method
+        result = super().select_mode(mode_number)
+        
+        if result:
+            logger.info(f"Logic B Mode {mode_number} selected. RTC: {self.rtc.get_date_string()}")
+        
+        return result
+    
+    def _handle_waiting_mode(self):
+        """Handle waiting for start button (overrides Logic A to add lockout check)"""
+        # Check date lockout before allowing START
+        if self._date_lockout_active:
+            logger.error("❌ Cannot start - date lockout is active")
+            logger.error(f"   Target date has been reached: {self.rtc.get_date_string()}")
+            self.en_espera = False
+            self.mode = OperationMode.IDLE
+            return
+        
+        # Check RTC validity
+        if not self.rtc.is_valid_date():
+            logger.error("❌ Cannot start - RTC has invalid date")
+            logger.error(f"   RTC year < 2000: {self.rtc.get_date_string()}")
+            self.en_espera = False
+            self.mode = OperationMode.IDLE
+            return
+        
+        # Call parent method
+        super()._handle_waiting_mode()
+    
     def start(self):
         """Start logic execution (overrides Logic A to add date check)"""
         # Check for date lockout before starting
@@ -247,6 +315,142 @@ class LogicB(LogicA):
         super().start()
         
         logger.info(f"Logic B started. Current RTC: {self.rtc.get_date_string()}")
+    
+    def funcion_en_ejecucion(self):
+        """
+        Main execution function (overrides Logic A to add RTC checks)
+        Adds date lockout and RTC validity checks before each phase
+        """
+        try:
+            # Pre-execution RTC check
+            if self._date_lockout_active:
+                logger.error("❌ Cannot execute - date lockout is active")
+                return
+            
+            if not self.rtc.is_valid_date():
+                logger.error("❌ Cannot execute - RTC has invalid date")
+                return
+            
+            logger.info("="*60)
+            logger.info("AUTOMATIC EXECUTION STARTED (Logic B)")
+            logger.info(f"Mode: {self.selected_mode}")
+            logger.info(f"RTC: {self.rtc.get_date_string()}")
+            logger.info("="*60)
+            
+            self.reset_pressed = False
+            self.cycle_count = 0
+            
+            # Get mode-specific parameters
+            mode_key = f"nivel{self.selected_mode}"
+            
+            logger.info(f"Loading parameters for Mode {self.selected_mode} ({mode_key})...")
+            
+            pasos_nivel1 = self.config['pasos_primer_nivel'].get(mode_key, 0)
+            pasos_intermedio = self.config['pasos_acomodo_segundo_nivel'].get(mode_key, 0)
+            pasos_nivel2 = self.config['pasos_segundo_nivel'].get(mode_key, 0)
+            vueltas_nivel1 = self.config['vueltas_primer_nivel'].get(mode_key, 0)
+            velocidad_lineal = self.config['velocidades_lineal'].get(mode_key, 3000)
+            velocidad_taladro = self.config['velocidades_taladro'].get(mode_key, 2200)
+            
+            logger.info(f"✓ Mode parameters:")
+            logger.info(f"  - Cycle 1 steps: {pasos_nivel1}")
+            logger.info(f"  - Intermediate steps: {pasos_intermedio}")
+            logger.info(f"  - Cycle 2 steps: {pasos_nivel2}")
+            logger.info(f"  - Cycle 1 revolutions: {vueltas_nivel1}")
+            logger.info(f"  - Linear speed: {velocidad_lineal}")
+            logger.info(f"  - Drill speed: {velocidad_taladro}")
+            
+            # Phase 1: Initial delay (with RTC check)
+            if self._check_date_lockout_before_phase("Phase 1"):
+                return
+            
+            logger.info("\\n" + "="*60)
+            logger.info("PHASE 1: Initial Delay with Drill Spinning")
+            logger.info("="*60)
+            if not self._execute_initial_delay(velocidad_taladro):
+                return
+            
+            # Phase 2: Cycle 1 (with RTC check)
+            if self._check_date_lockout_before_phase("Phase 2"):
+                return
+            
+            logger.info("\\n" + "="*60)
+            logger.info("PHASE 2: Cycle 1 - Back and Forth with Drill")
+            logger.info("="*60)
+            if not self._execute_cycle_1(pasos_nivel1, vueltas_nivel1, velocidad_lineal, velocidad_taladro):
+                return
+            
+            time.sleep(1.0)
+            
+            # Phase 3: Intermediate (with RTC check)
+            if self._check_date_lockout_before_phase("Phase 3"):
+                return
+            
+            logger.info("\\n" + "="*60)
+            logger.info("PHASE 3: Intermediate Positioning")
+            logger.info("="*60)
+            if not self._execute_intermediate_movement(pasos_intermedio, velocidad_lineal):
+                return
+            
+            time.sleep(1.0)
+            
+            # Phase 4: Cycle 2 (with RTC check)
+            if self._check_date_lockout_before_phase("Phase 4"):
+                return
+            
+            logger.info("\\n" + "="*60)
+            logger.info("PHASE 4: Cycle 2 - Back and Forth with Drill Pulses")
+            logger.info("="*60)
+            if not self._execute_cycle_2(pasos_nivel2, velocidad_lineal, velocidad_taladro):
+                return
+            
+            # Phase 5: Wait for reset
+            logger.info("\\n" + "="*60)
+            logger.info("EXECUTION COMPLETE - Waiting for RESET")
+            logger.info("="*60)
+            self._wait_for_reset()
+            
+        except Exception as e:
+            logger.error(f"❌ Error in execution: {e}", exc_info=True)
+            self.csv_logger.log_error("B", "Execution", str(e))
+        finally:
+            self.en_ejecucion = False
+            self.mode = OperationMode.IDLE
+            logger.info("✓ Automatic execution ended")
+            self._update_status()
+    
+    def _check_date_lockout_before_phase(self, phase_name: str) -> bool:
+        """
+        Check for date lockout before starting a phase
+        
+        Args:
+            phase_name: Name of the phase being started
+        
+        Returns:
+            True if lockout detected (should abort), False if safe to continue
+        """
+        # Check date lockout
+        rtc_config = self.config.get('rtc_config', {})
+        target = rtc_config.get('target_date', {})
+        
+        if self._check_target_date_reached(self.rtc, target):
+            if not self._date_lockout_active:
+                error_msg = f"Date lockout detected before {phase_name}! Date: {self.rtc.get_date_string()}"
+                logger.critical(error_msg)
+                self.csv_logger.log_error("B", "RTC", error_msg, system_state=phase_name)
+                self._date_lockout_active = True
+                self._emergency_stop_due_to_date_lockout()
+            return True
+        
+        # Check RTC validity
+        if not self.rtc.is_valid_date():
+            error_msg = f"RTC invalid date detected before {phase_name}! Date: {self.rtc.get_date_string()}"
+            logger.critical(error_msg)
+            self.csv_logger.log_error("B", "Hardware", error_msg, system_state=phase_name)
+            self._emergency_stop_due_to_rtc_error()
+            return True
+        
+        return False
     
     def get_status(self) -> Dict[str, Any]:
         """Get current status (overrides Logic A to add RTC info)"""
@@ -341,6 +545,142 @@ class LogicB(LogicA):
         except Exception as e:
             logger.error(f"Failed to set RTC: {e}")
             self.csv_logger.log_error("B", "Configuration", f"RTC set failed: {e}")
+    
+    def funcion_en_ejecucion(self):
+        """
+        Main execution function (overrides Logic A to add RTC checks)
+        Adds date lockout and RTC validity checks before each phase
+        """
+        try:
+            # Pre-execution RTC check
+            if self._date_lockout_active:
+                logger.error("❌ Cannot execute - date lockout is active")
+                return
+            
+            if not self.rtc.is_valid_date():
+                logger.error("❌ Cannot execute - RTC has invalid date")
+                return
+            
+            logger.info("="*60)
+            logger.info("AUTOMATIC EXECUTION STARTED (Logic B)")
+            logger.info(f"Mode: {self.selected_mode}")
+            logger.info(f"RTC: {self.rtc.get_date_string()}")
+            logger.info("="*60)
+            
+            self.reset_pressed = False
+            self.cycle_count = 0
+            
+            # Get mode-specific parameters
+            mode_key = f"nivel{self.selected_mode}"
+            
+            logger.info(f"Loading parameters for Mode {self.selected_mode} ({mode_key})...")
+            
+            pasos_nivel1 = self.config['pasos_primer_nivel'].get(mode_key, 0)
+            pasos_intermedio = self.config['pasos_acomodo_segundo_nivel'].get(mode_key, 0)
+            pasos_nivel2 = self.config['pasos_segundo_nivel'].get(mode_key, 0)
+            vueltas_nivel1 = self.config['vueltas_primer_nivel'].get(mode_key, 0)
+            velocidad_lineal = self.config['velocidades_lineal'].get(mode_key, 3000)
+            velocidad_taladro = self.config['velocidades_taladro'].get(mode_key, 2200)
+            
+            logger.info(f"✓ Mode parameters:")
+            logger.info(f"  - Cycle 1 steps: {pasos_nivel1}")
+            logger.info(f"  - Intermediate steps: {pasos_intermedio}")
+            logger.info(f"  - Cycle 2 steps: {pasos_nivel2}")
+            logger.info(f"  - Cycle 1 revolutions: {vueltas_nivel1}")
+            logger.info(f"  - Linear speed: {velocidad_lineal}")
+            logger.info(f"  - Drill speed: {velocidad_taladro}")
+            
+            # Phase 1: Initial delay (with RTC check)
+            if self._check_date_lockout_before_phase("Phase 1"):
+                return
+            
+            logger.info("\\n" + "="*60)
+            logger.info("PHASE 1: Initial Delay with Drill Spinning")
+            logger.info("="*60)
+            if not self._execute_initial_delay(velocidad_taladro):
+                return
+            
+            # Phase 2: Cycle 1 (with RTC check)
+            if self._check_date_lockout_before_phase("Phase 2"):
+                return
+            
+            logger.info("\\n" + "="*60)
+            logger.info("PHASE 2: Cycle 1 - Back and Forth with Drill")
+            logger.info("="*60)
+            if not self._execute_cycle_1(pasos_nivel1, vueltas_nivel1, velocidad_lineal, velocidad_taladro):
+                return
+            
+            time.sleep(1.0)
+            
+            # Phase 3: Intermediate (with RTC check)
+            if self._check_date_lockout_before_phase("Phase 3"):
+                return
+            
+            logger.info("\\n" + "="*60)
+            logger.info("PHASE 3: Intermediate Positioning")
+            logger.info("="*60)
+            if not self._execute_intermediate_movement(pasos_intermedio, velocidad_lineal):
+                return
+            
+            time.sleep(1.0)
+            
+            # Phase 4: Cycle 2 (with RTC check)
+            if self._check_date_lockout_before_phase("Phase 4"):
+                return
+            
+            logger.info("\\n" + "="*60)
+            logger.info("PHASE 4: Cycle 2 - Back and Forth with Drill Pulses")
+            logger.info("="*60)
+            if not self._execute_cycle_2(pasos_nivel2, velocidad_lineal, velocidad_taladro):
+                return
+            
+            # Phase 5: Wait for reset
+            logger.info("\\n" + "="*60)
+            logger.info("EXECUTION COMPLETE - Waiting for RESET")
+            logger.info("="*60)
+            self._wait_for_reset()
+            
+        except Exception as e:
+            logger.error(f"❌ Error in execution: {e}", exc_info=True)
+            self.csv_logger.log_error("B", "Execution", str(e))
+        finally:
+            self.en_ejecucion = False
+            self.mode = OperationMode.IDLE
+            logger.info("✓ Automatic execution ended")
+            self._update_status()
+    
+    def _check_date_lockout_before_phase(self, phase_name: str) -> bool:
+        """
+        Check for date lockout before starting a phase
+        
+        Args:
+            phase_name: Name of the phase being started
+        
+        Returns:
+            True if lockout detected (should abort), False if safe to continue
+        """
+        # Check date lockout
+        rtc_config = self.config.get('rtc_config', {})
+        target = rtc_config.get('target_date', {})
+        
+        if self._check_target_date_reached(self.rtc, target):
+            if not self._date_lockout_active:
+                error_msg = f"Date lockout detected before {phase_name}! Date: {self.rtc.get_date_string()}"
+                logger.critical(error_msg)
+                self.csv_logger.log_error("B", "RTC", error_msg, system_state=phase_name)
+                self._date_lockout_active = True
+                self._emergency_stop_due_to_date_lockout()
+            return True
+        
+        # Check RTC validity
+        if not self.rtc.is_valid_date():
+            error_msg = f"RTC invalid date detected before {phase_name}! Date: {self.rtc.get_date_string()}"
+            logger.critical(error_msg)
+            self.csv_logger.log_error("B", "Hardware", error_msg, system_state=phase_name)
+            self._emergency_stop_due_to_rtc_error()
+            return True
+        
+        return False
     
     def cleanup(self):
         """Cleanup resources (overrides Logic A)"""

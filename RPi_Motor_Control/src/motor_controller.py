@@ -259,8 +259,13 @@ class Button:
             
             # Rising edge detected (button pressed)
             if current_state == 1:
-                logger.debug(f"Button '{self.name}' pressed")
+                logger.info(f"[BTN] Button '{self.name}' pressed (GPIO {self.pin})")
+                logger.debug(f"   State transition: LOW -> HIGH (button released)")
                 return True
+            else:
+                logger.debug(f"   Button '{self.name}' state: HIGH -> LOW (button pressed down)")
+        
+        return False
         
         return False
 
@@ -294,7 +299,35 @@ class LimitSwitch:
     
     def is_triggered(self) -> bool:
         """Check if limit switch is triggered"""
-        return self.hw.read(self.pin) == 1
+        current_value = self.hw.read(self.pin)
+        
+        # For safety switch (name="Safety"), active HIGH = safe, so we invert the logic
+        if self.name == "Safety":
+            triggered = current_value == 1  # HIGH = safe/triggered (system can run)
+        else:
+            triggered = current_value == 1  # For limit switches, HIGH = triggered
+        
+        # Log state changes (throttle to once per second)
+        current_time = time.time()
+        if self.name == "Safety":
+            # Special logging for safety switch
+            if triggered and (current_time - getattr(self, '_last_trigger_log', 0)) > 1.0:
+                # logger.info(f"\u2713 Safety Switch SAFE (GPIO {self.pin} = HIGH)")
+                # logger.info(f"   System is safe to operate")
+                self._last_trigger_log = current_time
+            elif not triggered and (current_time - getattr(self, '_last_release_log', 0)) > 1.0:
+                logger.warning(f"\u26a0\ufe0f  Safety Switch UNSAFE (GPIO {self.pin} = LOW)")
+                logger.warning(f"   System should pause/stop operation")
+                self._last_release_log = current_time
+        else:
+            # Regular limit switch logging - only log triggered state, suppress released logs
+            if triggered and (current_time - getattr(self, '_last_trigger_log', 0)) > 1.0:
+                logger.warning(f"⚠️  Limit Switch '{self.name}' TRIGGERED (GPIO {self.pin})")
+                logger.info(f"   Position limit reached - motor should stop")
+                self._last_trigger_log = current_time
+            # Removed released log to reduce verbosity
+        
+        return triggered
     
     def check_rising_edge(self) -> bool:
         """

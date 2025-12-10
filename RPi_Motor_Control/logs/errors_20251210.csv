@@ -1,0 +1,15 @@
+Timestamp,Logic,Error_Type,Error_Message,Stack_Trace,System_State
+2025-12-10 15:34:18.400,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 15:38:14.846,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 15:47:42.212,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 15:55:04.594,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 15:55:06.969,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 16:16:58.837,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 16:28:09.746,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 16:32:54.154,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 16:50:41.366,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 16:52:11.999,B,RTC,Target date reached! System lockout activated. Date: 2025/12/10 16:52:11,,idle
+2025-12-10 18:07:06.966,System,Configuration,Bulk update failed: 'ExecutionManager' object has no attribute '_emergency_stop',,
+2025-12-10 18:18:52.157,System,Configuration,Bulk update failed: 'ExecutionManager' object has no attribute 'config_a_path',,
+2025-12-10 18:19:01.123,System,Configuration,Bulk update failed: 'ExecutionManager' object has no attribute 'config_a_path',,
+2025-12-10 18:20:38.470,System,Configuration,Bulk update failed: CSVLogger.log_operation() got an unexpected keyword argument 'description',,

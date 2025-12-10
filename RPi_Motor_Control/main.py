@@ -9,20 +9,8 @@ import logging
 import argparse
 import json
 import os
+import time
 from pathlib import Path
-
-# Add GPIO Simulator mock library to path (for local testing on Windows/Mac)
-simulator_path = os.path.join(os.path.dirname(__file__), '..', 'RPi_GPIO_Simulator', 'mock_gpio')
-if os.path.exists(simulator_path):
-    sys.path.insert(0, simulator_path)
-    print("=" * 70)
-    print("✓ GPIO SIMULATOR MODE ENABLED")
-    print(f"  Mock library path: {simulator_path}")
-    print(f"  Simulator should be running on: http://localhost:8100")
-    print("=" * 70)
-else:
-    print(f"⚠ GPIO Simulator not found at: {simulator_path}")
-    print(f"  Will use built-in simulation mode or real hardware")
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -31,6 +19,7 @@ from src.hardware_interface import get_hardware_interface
 from src.logger import init_csv_logger
 from src.execution_manager import create_execution_manager
 from src.web_server import create_web_server
+from src.gpio_monitor import GPIOMonitor
 
 # Setup logging
 logging.basicConfig(
@@ -41,6 +30,11 @@ logging.basicConfig(
         logging.FileHandler('logs/system.log')
     ]
 )
+
+# Suppress Flask/Werkzeug HTTP request logs (only show warnings and errors)
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
+logging.getLogger('socketio').setLevel(logging.WARNING)
+logging.getLogger('engineio').setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +69,7 @@ class MotorControlSystem:
         # Initialize components
         self.hw_interface = None
         self.csv_logger = None
+        self.gpio_monitor = None
         self.execution_manager = None
         self.web_server = None
         
@@ -99,6 +94,39 @@ class MotorControlSystem:
                 'logging': {'operations_log': 'logs/operations_{date}.csv'}
             }
     
+    def _check_startup_safety(self):
+        """Check safety switch at startup and wait for safe state + start button if unsafe"""
+        # GPIO 6 is the safety switch - active HIGH = safe, LOW = unsafe
+        SAFETY_SWITCH_PIN = 6
+        
+        safety_state = self.hw_interface.read(SAFETY_SWITCH_PIN)
+        
+        if not safety_state:  # LOW = unsafe
+            logger.warning("\u26a0\ufe0f  SAFETY SWITCH UNSAFE at startup (GPIO 6 = LOW)")
+            logger.warning("   System will wait for safety HIGH + Start button before continuing...")
+            
+            # Create temporary button to wait for start
+            START_BUTTON_PIN = 23
+            from src.motor_controller import Button
+            btn_start = Button(self.hw_interface, START_BUTTON_PIN, "Start")
+            
+            # Step 1: Wait for safety switch to be HIGH
+            logger.warning("⏸️  Step 1: Waiting for safety switch to be HIGH (safe)...")
+            while not self.hw_interface.read(SAFETY_SWITCH_PIN):
+                time.sleep(0.05)
+            
+            logger.info("✓ Safety switch is now HIGH (safe)")
+            
+            # Step 2: Wait for Start button
+            logger.warning("⏸️  Step 2: Press Start button to continue startup...")
+            while True:
+                if btn_start.check_rising_edge():
+                    logger.info("✓ Start button pressed - continuing startup")
+                    break
+                time.sleep(0.01)
+        else:
+            logger.info("✓ Safety switch is safe at startup (GPIO 6 = HIGH)")
+    
     def initialize(self):
         """Initialize all system components"""
         try:
@@ -113,7 +141,15 @@ class MotorControlSystem:
             log_dir = Path(self.system_config.get('logging', {}).get('operations_log', 'logs/operations.csv')).parent
             self.csv_logger = init_csv_logger(str(log_dir))
             
-            # 3. Initialize execution manager
+            # 3. Initialize GPIO monitor
+            logger.info("Initializing GPIO monitor...")
+            self.gpio_monitor = GPIOMonitor(self.hw_interface, self.system_config)
+            
+            # 4. Check safety switch at startup (matches Arduino setup())
+            logger.info("Checking safety switch at startup...")
+            self._check_startup_safety()
+            
+            # 5. Initialize execution manager
             logger.info("Initializing execution manager...")
             config_dir = Path(__file__).parent / 'config'
             config_a_path = config_dir / 'config_logic_a.json'
@@ -126,10 +162,10 @@ class MotorControlSystem:
                 self.csv_logger
             )
             
-            # 4. Initialize web server
+            # 6. Initialize web server
             logger.info("Initializing web server...")
             web_config = self.system_config.get('web_server', {})
-            self.web_server = create_web_server(self.execution_manager, web_config)
+            self.web_server = create_web_server(self.execution_manager, web_config, self.gpio_monitor)
             
             logger.info("System initialization complete")
             self.csv_logger.log_operation("System", "Startup", "Initialize", "Success")
