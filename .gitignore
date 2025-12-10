@@ -1,3 +1,44 @@
-RPi_Motor_Control/logs/errors_20251210.csv
-RPi_Motor_Control/logs/operations_20251210.csv
+# Python virtual environment
+venv/
+env/
+ENV/
+.venv/
+RPi_Motor_Control/venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Log files
+*.log
+RPi_Motor_Control/logs/*.csv
+RPi_Motor_Control/logs/errors_*.csv
+RPi_Motor_Control/logs/operations_*.csv
+RPi_Motor_Control/logs/parameters_*.csv
 RPi_Motor_Control/logs/system.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# System files
+Thumbs.db
+.Spotlight-V100
+.Trashes
