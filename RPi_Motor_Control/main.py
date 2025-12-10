@@ -31,6 +31,11 @@ logging.basicConfig(
     ]
 )
 
+# Suppress Flask/Werkzeug HTTP request logs (only show warnings and errors)
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
+logging.getLogger('socketio').setLevel(logging.WARNING)
+logging.getLogger('engineio').setLevel(logging.WARNING)
+
 logger = logging.getLogger(__name__)
 
 
