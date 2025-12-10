@@ -259,7 +259,7 @@ class Button:
             
             # Rising edge detected (button pressed)
             if current_state == 1:
-                logger.info(f"\ud83d\udd18 Button '{self.name}' pressed (GPIO {self.pin})")
+                logger.info(f"[BTN] Button '{self.name}' pressed (GPIO {self.pin})")
                 logger.debug(f"   State transition: LOW -> HIGH (button released)")
                 return True
             else:
