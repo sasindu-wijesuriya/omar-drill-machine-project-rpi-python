@@ -229,17 +229,24 @@ class LogicA:
         self.en_espera = True
         self.mode = OperationMode.WAITING
         
-        # Load mode parameters from config (Arduino loads mode-specific params)
-        mode_key = f"modo_{chr(64 + mode_number)}"  # modo_A, modo_B, etc.
-        if mode_key in self.config:
-            mode_params = self.config[mode_key]
-            logger.info(f"✓ Mode {mode_number} parameters loaded:")
-            logger.info(f"  - Cycles: {mode_params.get('n_vueltas_tope', 'N/A')}")
-            logger.info(f"  - Linear speed: {mode_params.get('velocidad_lineal', 'N/A')}")
-            logger.info(f"  - Drill speed: {mode_params.get('velocidad_broca', 'N/A')}")
-            logger.info(f"  - Steps: {mode_params.get('pasos_a_dar', 'N/A')}")
-        else:
-            logger.warning(f"⚠️  Mode {mode_number} parameters not found in config")
+        # Load mode parameters from config (Arduino structure: nivel1-5)
+        mode_key = f"nivel{mode_number}"
+        
+        # Display parameters from different config sections
+        pasos_nivel1 = self.config['pasos_primer_nivel'].get(mode_key, 'N/A')
+        pasos_intermedio = self.config['pasos_acomodo_segundo_nivel'].get(mode_key, 'N/A')
+        pasos_nivel2 = self.config['pasos_segundo_nivel'].get(mode_key, 'N/A')
+        vueltas_nivel1 = self.config['vueltas_primer_nivel'].get(mode_key, 'N/A')
+        velocidad_lineal = self.config['velocidades_lineal'].get(mode_key, 'N/A')
+        velocidad_taladro = self.config['velocidades_taladro'].get(mode_key, 'N/A')
+        
+        logger.info(f"✓ Mode {mode_number} parameters loaded:")
+        logger.info(f"  - Cycle 1 revolutions: {vueltas_nivel1}")
+        logger.info(f"  - Cycle 1 steps: {pasos_nivel1}")
+        logger.info(f"  - Intermediate steps: {pasos_intermedio}")
+        logger.info(f"  - Cycle 2 steps: {pasos_nivel2}")
+        logger.info(f"  - Linear speed: {velocidad_lineal} µs")
+        logger.info(f"  - Drill speed: {velocidad_taladro} µs")
         
         logger.info("✓ Status: WAITING FOR START BUTTON")
         logger.info("  Press START button to begin automatic execution")
@@ -661,21 +668,19 @@ class LogicA:
             self.reset_pressed = False
             self.cycle_count = 0
             
-            # Get mode-specific parameters from config
-            mode_key = f"modo_{chr(64 + self.selected_mode)}"  # modo_A, modo_B, etc.
-            if mode_key not in self.config:
-                logger.error(f"Mode configuration {mode_key} not found!")
-                return
+            # Get mode-specific parameters from config (Arduino structure)
+            # Mode 1-5 corresponds to nivel1-5 in config
+            mode_key = f"nivel{self.selected_mode}"
             
-            mode_config = self.config[mode_key]
+            logger.info(f"Loading parameters for Mode {self.selected_mode} ({mode_key})...")
             
-            # Extract parameters
-            pasos_nivel1 = mode_config.get('pasos_a_dar', 0)
-            pasos_intermedio = mode_config.get('pasos_movimiento_intermedio', 0)
-            pasos_nivel2 = mode_config.get('pasos_segundo_nivel', 0)
-            vueltas_nivel1 = mode_config.get('n_vueltas_tope', 0)
-            velocidad_lineal = mode_config.get('velocidad_lineal', 3000)
-            velocidad_taladro = mode_config.get('velocidad_broca', 2200)
+            # Extract parameters from different config sections
+            pasos_nivel1 = self.config['pasos_primer_nivel'].get(mode_key, 0)
+            pasos_intermedio = self.config['pasos_acomodo_segundo_nivel'].get(mode_key, 0)
+            pasos_nivel2 = self.config['pasos_segundo_nivel'].get(mode_key, 0)
+            vueltas_nivel1 = self.config['vueltas_primer_nivel'].get(mode_key, 0)
+            velocidad_lineal = self.config['velocidades_lineal'].get(mode_key, 3000)
+            velocidad_taladro = self.config['velocidades_taladro'].get(mode_key, 2200)
             
             logger.info(f"✓ Mode parameters:")
             logger.info(f"  - Cycle 1 steps: {pasos_nivel1}")

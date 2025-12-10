@@ -320,14 +320,12 @@ class LimitSwitch:
                 logger.warning(f"   System should pause/stop operation")
                 self._last_release_log = current_time
         else:
-            # Regular limit switch logging
+            # Regular limit switch logging - only log triggered state, suppress released logs
             if triggered and (current_time - getattr(self, '_last_trigger_log', 0)) > 1.0:
-                logger.warning(f"\u26a0\ufe0f  Limit Switch '{self.name}' TRIGGERED (GPIO {self.pin})")
+                logger.warning(f"⚠️  Limit Switch '{self.name}' TRIGGERED (GPIO {self.pin})")
                 logger.info(f"   Position limit reached - motor should stop")
                 self._last_trigger_log = current_time
-            elif not triggered and hasattr(self, '_last_trigger_log') and (current_time - getattr(self, '_last_release_log', 0)) > 1.0:
-                logger.info(f"\u2713 Limit Switch '{self.name}' released (GPIO {self.pin})")
-                self._last_release_log = current_time
+            # Removed released log to reduce verbosity
         
         return triggered
     
