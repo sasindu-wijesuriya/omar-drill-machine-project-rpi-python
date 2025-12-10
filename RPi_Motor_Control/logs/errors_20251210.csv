@@ -7,3 +7,5 @@ Timestamp,Logic,Error_Type,Error_Message,Stack_Trace,System_State
 2025-12-10 16:16:58.837,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
 2025-12-10 16:28:09.746,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
 2025-12-10 16:32:54.154,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 16:50:41.366,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
+2025-12-10 16:52:11.999,B,RTC,Target date reached! System lockout activated. Date: 2025/12/10 16:52:11,,idle
