@@ -65,7 +65,10 @@ class ExecutionManager:
     
     def select_logic(self, logic: str) -> bool:
         """
-        Select which logic to use (A or B)
+        Select which logic to use (A or B) and start it immediately (Arduino-like behavior)
+        - Stops any currently running logic
+        - Resets hardware to safe state
+        - Starts the new logic thread
         
         Args:
             logic: "A" or "B"
@@ -76,77 +79,119 @@ class ExecutionManager:
         with self._lock:
             logger.info(f"==== Logic Selection Request: {logic.upper()} ====")
             
-            # Cannot change logic while one is running
+            # Stop currently active logic if any
             if self._active_logic != ActiveLogic.NONE:
-                logger.warning(f"❌ Cannot select logic - {self._active_logic.value} is currently running")
-                logger.warning("⚠️  Stop the active logic first before selecting a new one")
-                return False
+                logger.info(f"⚠️  Stopping currently active {self._active_logic.value}...")
+                try:
+                    if self._active_logic == ActiveLogic.LOGIC_A:
+                        self.logic_a.stop()
+                        logger.info("  - Logic A stopped")
+                    elif self._active_logic == ActiveLogic.LOGIC_B:
+                        self.logic_b.stop()
+                        logger.info("  - Logic B stopped")
+                    
+                    # Reset hardware to safe state
+                    logger.info("  - Resetting hardware to safe state...")
+                    self.hw.reset_all_motors()
+                    logger.info("  - Hardware reset complete")
+                    
+                    self._active_logic = ActiveLogic.NONE
+                    self._selected_logic = ActiveLogic.NONE
+                except Exception as e:
+                    logger.error(f"❌ Error stopping active logic: {e}")
+                    # Force reset anyway
+                    self._active_logic = ActiveLogic.NONE
+                    self._selected_logic = ActiveLogic.NONE
+                    try:
+                        self.hw.reset_all_motors()
+                    except:
+                        pass
             
-            if logic.upper() == "A":
-                self._selected_logic = ActiveLogic.LOGIC_A
-                logger.info("✓ Logic A (CG4n51_L1) selected successfully")
-                logger.info("  - Standard motor control logic")
-                logger.info("  - No RTC date checking")
-                logger.info("  - Ready to start")
-                self.csv_logger.log_operation("System", "Selection", "LogicA", "Selected")
-                return True
-            elif logic.upper() == "B":
-                self._selected_logic = ActiveLogic.LOGIC_B
-                logger.info("✓ Logic B (CG4n51_L2) selected successfully")
-                logger.info("  - Motor control with RTC date checking")
-                logger.info("  - Target date lockout enabled")
-                logger.info("  - Ready to start")
-                self.csv_logger.log_operation("System", "Selection", "LogicB", "Selected")
-                return True
-            else:
+            # Validate logic selection
+            if logic.upper() not in ["A", "B"]:
                 logger.error(f"❌ Invalid logic selection: {logic}")
                 logger.error("   Valid options are: 'A' or 'B'")
                 return False
+            
+            # Select and start new logic
+            try:
+                if logic.upper() == "A":
+                    self._selected_logic = ActiveLogic.LOGIC_A
+                    logger.info("✓ Logic A (CG4n51_L1) selected")
+                    logger.info("  - Standard motor control logic")
+                    logger.info("  - No RTC date checking")
+                    logger.info("  - Starting Logic A thread...")
+                    self.logic_a.start()
+                    self._active_logic = ActiveLogic.LOGIC_A
+                    logger.info("✓ Logic A now running")
+                    logger.info("  - System state: ACTIVE")
+                    self.csv_logger.log_operation("System", "Selection", "LogicA", "Selected and Started")
+                    return True
+                    
+                elif logic.upper() == "B":
+                    self._selected_logic = ActiveLogic.LOGIC_B
+                    logger.info("✓ Logic B (CG4n51_L2) selected")
+                    logger.info("  - Motor control with RTC date checking")
+                    logger.info("  - Target date lockout enabled")
+                    logger.info("  - Starting Logic B thread...")
+                    self.logic_b.start()
+                    self._active_logic = ActiveLogic.LOGIC_B
+                    logger.info("✓ Logic B now running")
+                    logger.info("  - System state: ACTIVE")
+                    self.csv_logger.log_operation("System", "Selection", "LogicB", "Selected and Started")
+                    return True
+                    
+            except Exception as e:
+                logger.error(f"❌ Failed to start logic: {e}", exc_info=True)
+                logger.error("   Check hardware connections and configuration")
+                self.csv_logger.log_error("System", "Execution", f"Start failed: {e}")
+                self._active_logic = ActiveLogic.NONE
+                self._selected_logic = ActiveLogic.NONE
+                return False
+        
+        return False
     
     def start_selected_logic(self) -> bool:
         """
+        DEPRECATED: Use select_logic() instead, which now auto-starts the logic.
+        This method is kept for backward compatibility.
+        
         Start the currently selected logic
         
         Returns:
             True if started successfully, False otherwise
         """
+        logger.warning("⚠️  start_selected_logic() is deprecated. Logic auto-starts when selected.")
+        
         with self._lock:
-            logger.info("==== Start Logic Request ====")
-            
-            if self._selected_logic == ActiveLogic.NONE:
-                logger.error("❌ Cannot start: No logic selected")
-                logger.error("   Please select Logic A or Logic B first")
-                return False
-            
+            # If logic is already running, just return success
             if self._active_logic != ActiveLogic.NONE:
-                logger.warning(f"⚠️  Cannot start - {self._active_logic.value} is already running")
-                logger.warning("   Stop the current logic before starting another")
-                return False
+                logger.info(f"ℹ️  {self._active_logic.value} is already running")
+                return True
             
-            try:
-                if self._selected_logic == ActiveLogic.LOGIC_A:
-                    logger.info("Starting Logic A (CG4n51_L1)...")
-                    logger.info("  - Initializing execution thread")
-                    self.logic_a.start()
-                    self._active_logic = ActiveLogic.LOGIC_A
-                    logger.info("✓ Logic A started successfully")
-                    logger.info("  - System state: ACTIVE")
-                    logger.info("  - Monitoring inputs and executing control logic")
-                    return True
-                elif self._selected_logic == ActiveLogic.LOGIC_B:
-                    logger.info("Starting Logic B (CG4n51_L2)...")
-                    logger.info("  - Initializing execution thread")
-                    logger.info("  - Checking RTC date")
-                    self.logic_b.start()
-                    self._active_logic = ActiveLogic.LOGIC_B
-                    logger.info("✓ Logic B started successfully")
-                    logger.info("  - System state: ACTIVE")
-                    logger.info("  - Monitoring inputs, RTC, and executing control logic")
-                    return True
-            except Exception as e:
-                logger.error(f"❌ Failed to start logic: {e}", exc_info=True)
-                logger.error("   Check hardware connections and configuration")
-                self.csv_logger.log_error("System", "Execution", f"Start failed: {e}")
+            # If logic is selected but not running, start it
+            if self._selected_logic != ActiveLogic.NONE:
+                logger.info("==== Start Logic Request ====")
+                
+                try:
+                    if self._selected_logic == ActiveLogic.LOGIC_A:
+                        logger.info("Starting Logic A (CG4n51_L1)...")
+                        self.logic_a.start()
+                        self._active_logic = ActiveLogic.LOGIC_A
+                        logger.info("✓ Logic A started successfully")
+                        return True
+                    elif self._selected_logic == ActiveLogic.LOGIC_B:
+                        logger.info("Starting Logic B (CG4n51_L2)...")
+                        self.logic_b.start()
+                        self._active_logic = ActiveLogic.LOGIC_B
+                        logger.info("✓ Logic B started successfully")
+                        return True
+                except Exception as e:
+                    logger.error(f"❌ Failed to start logic: {e}", exc_info=True)
+                    self.csv_logger.log_error("System", "Execution", f"Start failed: {e}")
+                    return False
+            else:
+                logger.error("❌ Cannot start: No logic selected")
                 return False
         
         return False

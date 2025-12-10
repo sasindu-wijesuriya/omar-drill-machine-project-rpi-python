@@ -104,6 +104,12 @@ class WebServer:
         # API: Select logic (A or B)
         @self.app.route('/api/select_logic', methods=['POST'])
         def select_logic():
+            """
+            Select and start a logic (A or B)
+            - Stops any running logic
+            - Resets hardware
+            - Starts the new logic thread
+            """
             try:
                 data = request.get_json()
                 logic = data.get('logic', '').upper()
@@ -111,12 +117,17 @@ class WebServer:
                 if logic not in ['A', 'B']:
                     return jsonify({'error': 'Invalid logic (must be A or B)'}), 400
                 
+                # Select logic (this now auto-stops previous logic, resets hardware, and starts new logic)
                 success = self.execution_manager.select_logic(logic)
                 
                 if success:
-                    return jsonify({'success': True, 'message': f'Logic {logic} selected'})
+                    return jsonify({
+                        'success': True, 
+                        'message': f'Logic {logic} selected and started',
+                        'status': 'running'
+                    })
                 else:
-                    return jsonify({'error': 'Failed to select logic'}), 400
+                    return jsonify({'error': 'Failed to select and start logic'}), 400
             except Exception as e:
                 logger.error(f"Select logic error: {e}")
                 return jsonify({'error': str(e)}), 500
@@ -144,14 +155,25 @@ class WebServer:
         # API: Start execution
         @self.app.route('/api/start', methods=['POST'])
         def start_execution():
-            """Start the logic thread (initializes the system)"""
+            """
+            DEPRECATED: Logic auto-starts when selected.
+            This endpoint is kept for backward compatibility.
+            """
             try:
                 success = self.execution_manager.start_selected_logic()
                 
                 if success:
-                    return jsonify({'success': True, 'message': 'Logic thread started'})
+                    return jsonify({
+                        'success': True, 
+                        'message': 'Logic thread already running or started',
+                        'deprecated': True,
+                        'info': 'Logic auto-starts when selected. This endpoint is no longer needed.'
+                    })
                 else:
-                    return jsonify({'error': 'Failed to start logic thread'}), 400
+                    return jsonify({
+                        'error': 'No logic selected or failed to start',
+                        'info': 'Use /api/select_logic to select and start a logic'
+                    }), 400
             except Exception as e:
                 logger.error(f"Start error: {e}")
                 return jsonify({'error': str(e)}), 500

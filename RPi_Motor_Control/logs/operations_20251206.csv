@@ -177,3 +177,7 @@ Timestamp,Logic,Mode,Operation,Status,Cycle_Count,Position,Details
 2025-12-06 19:10:20.046,System,Emergency,EmergencyStop,Completed,0,,
 2025-12-06 19:10:20.047,System,Shutdown,Cleanup,Success,0,,
 2025-12-06 19:10:20.867,System,Startup,Initialize,Success,0,,
+2025-12-08 17:09:50.827,System,Emergency,EmergencyStop,Completed,0,,
+2025-12-08 17:09:50.829,System,Shutdown,Cleanup,Success,0,,
+2025-12-08 17:09:50.830,System,Emergency,EmergencyStop,Completed,0,,
+2025-12-08 17:09:50.831,System,Shutdown,Cleanup,Success,0,,

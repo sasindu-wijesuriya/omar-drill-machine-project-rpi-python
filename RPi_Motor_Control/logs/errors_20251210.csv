@@ -1,0 +1,2 @@
+Timestamp,Logic,Error_Type,Error_Message,Stack_Trace,System_State
+2025-12-10 15:34:18.400,B,RTC,Target date 2025/10/13 has been reached!,,Lockout
