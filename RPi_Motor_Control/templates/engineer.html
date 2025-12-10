@@ -128,9 +128,10 @@
       <!-- Logic Selector -->
       <div class="card">
         <h2>Select Logic to Configure</h2>
+        <p style="color: #7f8c8d; margin-bottom: 15px;">Choose which logic to load and configure:</p>
         <div class="logic-selector">
           <div class="logic-btn-group">
-            <button id="logicABtn" class="btn btn-primary active" onclick="selectLogic('A')">
+            <button id="logicABtn" class="btn btn-primary" onclick="selectLogic('A')">
               Logic A (CG4n51_L1)
             </button>
             <button id="logicBBtn" class="btn btn-primary" onclick="selectLogic('B')">
@@ -164,8 +165,8 @@
       </div>
 
       <!-- Parameter Editor -->
-      <div class="card">
-        <h2 id="configTitle">Logic A - Mode Parameters</h2>
+      <div class="card" id="parameterCard" style="display: none;">
+        <h2 id="configTitle">Mode Parameters</h2>
         
         <div class="readonly-info">
           <strong>ℹ️ Note:</strong> Pin configurations and motor parameters are fixed. 
@@ -189,7 +190,7 @@
       </div>
 
       <!-- Save Section -->
-      <div class="save-section">
+      <div class="save-section" id="saveSection" style="display: none;">
         <div class="button-group">
           <button id="saveBtn" class="btn btn-success" onclick="saveConfiguration()">
             💾 Save All Changes
@@ -203,21 +204,39 @@
     </div>
 
     <script>
-      let currentLogic = 'A';
+      let currentLogic = null;
       let currentModeView = 1;
       let configData = null;
 
-      // Load configuration on page load
+      // Load page on DOMContentLoaded
       window.addEventListener('DOMContentLoaded', () => {
-        loadConfiguration();
         startStatusPolling();
+        
+        // Setup logout button
+        document.getElementById('logoutBtn').addEventListener('click', logout);
       });
+      
+      async function logout() {
+        try {
+          await fetch('/api/engineer/logout', { method: 'POST' });
+        } catch (error) {
+          console.error('Logout error:', error);
+        } finally {
+          // Always redirect to engineer login page
+          window.location.href = '/engineer';
+        }
+      }
 
-      function selectLogic(logic) {
+      async function selectLogic(logic) {
         currentLogic = logic;
         document.getElementById('logicABtn').classList.toggle('active', logic === 'A');
         document.getElementById('logicBBtn').classList.toggle('active', logic === 'B');
-        loadConfiguration();
+        
+        // Show loading message
+        showMessage(`Loading Logic ${logic} configuration...`, 'info');
+        
+        // Load configuration
+        await loadConfiguration();
       }
 
       function selectMode(mode) {
@@ -231,26 +250,48 @@
       }
 
       async function loadConfiguration() {
+        if (!currentLogic) {
+          showMessage('Please select a logic first', 'warning');
+          return;
+        }
+        
         try {
-          const configType = currentLogic === 'A' ? 'logic_a' : 'logic_b';
-          const response = await fetch(`/api/config/${configType}`);
+          // Use uppercase A or B for the API endpoint
+          const response = await fetch(`/api/config/${currentLogic}`);
+          
+          if (response.status === 401) {
+            // Not authenticated, redirect to login
+            window.location.href = '/engineer';
+            return;
+          }
+          
           const data = await response.json();
 
           if (data.success) {
             configData = data.config;
             document.getElementById('configTitle').textContent = 
-              `${configData.logic_name} - Mode Parameters`;
+              `${configData.logic_name || 'Logic ' + currentLogic} - Mode Parameters`;
+            
+            // Show parameter editor and save section
+            document.getElementById('parameterCard').style.display = 'block';
+            document.getElementById('saveSection').style.display = 'block';
+            
             renderParameters();
             showMessage('Configuration loaded successfully', 'success');
           } else {
-            showMessage('Failed to load configuration', 'error');
+            showMessage('Failed to load configuration: ' + (data.error || 'Unknown error'), 'error');
           }
         } catch (error) {
-          showMessage('Error: ' + error.message, 'error');
+          console.error('Load config error:', error);
+          showMessage('Error loading configuration: ' + error.message, 'error');
         }
       }
 
       async function reloadConfiguration() {
+        if (!currentLogic) {
+          showMessage('Please select a logic first', 'warning');
+          return;
+        }
         if (confirm('Reload configuration from file? Unsaved changes will be lost.')) {
           await loadConfiguration();
         }
@@ -380,6 +421,11 @@
       }
 
       async function saveConfiguration() {
+        if (!currentLogic) {
+          showMessage('Please select a logic first', 'warning');
+          return;
+        }
+        
         if (!configData) {
           showMessage('No configuration loaded', 'error');
           return;
@@ -390,47 +436,39 @@
         }
 
         try {
-          // Collect all modified values
+          // Collect all modified values into parameters object
+          const parameters = {};
           const inputs = document.querySelectorAll('input[data-path]');
           inputs.forEach(input => {
             const path = input.dataset.path;
             const value = parseFloat(input.value) || 0;
-            setNestedValue(configData, path, value);
+            parameters[path] = value;
           });
 
-          // Stop execution first
-          try {
-            await fetch('/api/stop', { method: 'POST' });
-          } catch (e) {
-            console.log('Stop request:', e);
-          }
-
-          // Save configuration
-          const configType = currentLogic === 'A' ? 'logic_a' : 'logic_b';
-          const response = await fetch(`/api/config/${configType}`, {
+          // Save all parameters (includes emergency stop)
+          const response = await fetch('/api/config/save-all', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ config: configData })
+            body: JSON.stringify({ 
+              logic: currentLogic,
+              parameters: parameters
+            })
           });
 
           const data = await response.json();
 
           if (data.success) {
-            showMessage('✅ Configuration saved successfully! System will reload.', 'success');
+            showMessage('✅ ' + data.message, 'success');
             
-            // Request system to reload configuration
-            setTimeout(async () => {
-              try {
-                await fetch('/api/reload_config', { method: 'POST' });
-                showMessage('✅ Configuration reloaded', 'success');
-              } catch (e) {
-                showMessage('⚠️ Saved but reload failed. Restart system manually.', 'warning');
-              }
-            }, 1000);
+            // Reload the configuration to show saved values
+            setTimeout(() => {
+              loadConfiguration();
+            }, 1500);
           } else {
-            showMessage('❌ Failed to save: ' + data.error, 'error');
+            showMessage('❌ Failed to save: ' + (data.error || 'Unknown error'), 'error');
           }
         } catch (error) {
+          console.error('Save error:', error);
           showMessage('❌ Error: ' + error.message, 'error');
         }
       }
@@ -460,15 +498,6 @@
         }, 5000);
       }
 
-      async function logout() {
-        try {
-          await fetch('/api/engineer/logout', { method: 'POST' });
-          window.location.href = '/';
-        } catch (error) {
-          window.location.href = '/';
-        }
-      }
-
       function startStatusPolling() {
         setInterval(async () => {
           try {
@@ -491,101 +520,6 @@
           }
         }, 1000);
       }
-    </script>
-  </body>
-</html>
-          const data = await response.json();
-
-          if (data.success) {
-            originalConfig = JSON.stringify(data.config, null, 2);
-            document.getElementById("configJson").value = originalConfig;
-            showMessage("Configuration loaded successfully", "success");
-          } else {
-            showMessage(
-              "Failed to load configuration: " + data.message,
-              "error"
-            );
-          }
-        } catch (error) {
-          showMessage("Error loading configuration: " + error.message, "error");
-        }
-      }
-
-      async function saveConfig() {
-        const configType = document.getElementById("configType").value;
-        const configText = document.getElementById("configJson").value;
-
-        try {
-          const config = JSON.parse(configText);
-
-          const response = await fetch(`/api/config/${configType}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ config }),
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-            originalConfig = configText;
-            showMessage("Configuration saved successfully", "success");
-          } else {
-            showMessage("Failed to save: " + data.message, "error");
-          }
-        } catch (error) {
-          showMessage("Error: " + error.message, "error");
-        }
-      }
-
-      function resetConfig() {
-        if (originalConfig) {
-          document.getElementById("configJson").value = originalConfig;
-          showMessage("Configuration reset to original", "info");
-        }
-      }
-
-      async function logout() {
-        try {
-          await fetch("/api/engineer/logout", { method: "POST" });
-          window.location.href = "/";
-        } catch (error) {
-          console.error("Logout error:", error);
-          window.location.href = "/";
-        }
-      }
-
-      function showMessage(text, type) {
-        const messageDiv = document.getElementById("message");
-        messageDiv.textContent = text;
-        messageDiv.className = "message " + type;
-        messageDiv.style.display = "block";
-
-        setTimeout(() => {
-          messageDiv.style.display = "none";
-        }, 5000);
-      }
-
-      // Load default config on page load
-      loadConfig();
-
-      // Auto-refresh status
-      setInterval(async () => {
-        try {
-          const response = await fetch("/api/status");
-          const status = await response.json();
-
-          document.getElementById("currentLogic").textContent =
-            status.selected_logic || "None";
-          document.getElementById("currentMode").textContent =
-            status.selected_mode || "None";
-          document.getElementById("systemState").textContent =
-            status.state || "Unknown";
-        } catch (error) {
-          console.error("Status update error:", error);
-        }
-      }, 1000);
     </script>
   </body>
 </html>

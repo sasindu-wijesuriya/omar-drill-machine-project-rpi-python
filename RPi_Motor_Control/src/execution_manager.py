@@ -6,6 +6,7 @@ Ensures only one logic runs at a time with thread safety
 
 import threading
 import logging
+import json
 from typing import Optional, Dict, Any, Callable
 from enum import Enum
 
@@ -44,6 +45,8 @@ class ExecutionManager:
         """
         self.hw = hw_interface
         self.csv_logger = csv_logger
+        self.config_a_path = config_a_path
+        self.config_b_path = config_b_path
         
         # Create logic instances
         self.logic_a = LogicA(hw_interface, config_a_path, csv_logger)
@@ -249,27 +252,31 @@ class ExecutionManager:
         logger.critical("   All motor operations will be halted immediately")
         
         with self._lock:
-            # Stop both logics
-            try:
-                logger.critical("  → Stopping Logic A...")
-                self.logic_a.stop()
-                logger.info("    ✓ Logic A stopped")
-            except Exception as e:
-                logger.error(f"    ❌ Error stopping Logic A: {e}")
+            self._emergency_stop_internal()
             
-            try:
-                logger.critical("  → Stopping Logic B...")
-                self.logic_b.stop()
-                logger.info("    ✓ Logic B stopped")
-            except Exception as e:
-                logger.error(f"    ❌ Error stopping Logic B: {e}")
-            
-            self._active_logic = ActiveLogic.NONE
-            logger.critical("✓ EMERGENCY STOP COMPLETE")
-            logger.critical("   System is now in SAFE STATE")
-            logger.critical("   All motors stopped, system idle")
-            
-            self.csv_logger.log_operation("System", "Emergency", "EmergencyStop", "Completed")
+    def _emergency_stop_internal(self):
+        """Internal emergency stop without lock (call when lock already held)"""
+        # Stop both logics
+        try:
+            logger.critical("  → Stopping Logic A...")
+            self.logic_a.stop()
+            logger.info("    ✓ Logic A stopped")
+        except Exception as e:
+            logger.error(f"    ❌ Error stopping Logic A: {e}")
+        
+        try:
+            logger.critical("  → Stopping Logic B...")
+            self.logic_b.stop()
+            logger.info("    ✓ Logic B stopped")
+        except Exception as e:
+            logger.error(f"    ❌ Error stopping Logic B: {e}")
+        
+        self._active_logic = ActiveLogic.NONE
+        logger.critical("✓ EMERGENCY STOP COMPLETE")
+        logger.critical("   System is now in SAFE STATE")
+        logger.critical("   All motors stopped, system idle")
+        
+        self.csv_logger.log_operation("System", "Emergency", "EmergencyStop", "Completed")
     
     def select_mode(self, mode_number: int) -> bool:
         """
@@ -471,6 +478,157 @@ class ExecutionManager:
             except Exception as e:
                 logger.error(f"Failed to update parameter: {e}", exc_info=True)
                 self.csv_logger.log_error("System", "Configuration", f"Parameter update failed: {e}")
+                return False
+    
+    def save_configuration(self, logic: str) -> bool:
+        """
+        Save configuration to file
+        Performs emergency stop on both logics before saving
+        
+        Args:
+            logic: "A" or "B"
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        with self._lock:
+            try:
+                # Emergency stop both logics
+                logger.critical("="*60)
+                logger.critical("CONFIGURATION SAVE - Emergency Stop Initiated")
+                logger.critical("="*60)
+                
+                self._emergency_stop_internal()
+                
+                # Determine config path and logic
+                if logic.upper() == "A":
+                    config_path = self.config_a_path
+                    config = self.logic_a.config
+                elif logic.upper() == "B":
+                    config_path = self.config_b_path
+                    config = self.logic_b.config
+                else:
+                    logger.error(f"Invalid logic: {logic}")
+                    return False
+                
+                # Save to file
+                with open(config_path, 'w') as f:
+                    json.dump(config, f, indent=2)
+                
+                logger.info(f"Configuration for Logic {logic.upper()} saved to {config_path}")
+                self.csv_logger.log_operation(
+                    logic.upper(),
+                    "System",
+                    "ConfigSave",
+                    "Success",
+                    details=f"Configuration saved to {config_path}"
+                )
+                
+                logger.critical("✓ Configuration saved successfully")
+                logger.critical("  System stopped - select logic to restart")
+                
+                return True
+                
+            except Exception as e:
+                logger.error(f"Failed to save configuration: {e}", exc_info=True)
+                self.csv_logger.log_error("System", "Configuration", f"Config save failed: {e}")
+                return False
+    
+    def update_and_save_configuration(self, logic: str, parameters: Dict[str, Any]) -> bool:
+        """
+        Update multiple parameters and save configuration
+        Performs emergency stop before saving
+        
+        Args:
+            logic: "A" or "B"
+            parameters: Dictionary of parameter paths and values
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        with self._lock:
+            try:
+                # Emergency stop both logics
+                logger.critical("="*60)
+                logger.critical("BULK CONFIGURATION UPDATE - Emergency Stop Initiated")
+                logger.critical(f"Updating {len(parameters)} parameters for Logic {logic.upper()}")
+                logger.critical("="*60)
+                
+                self._emergency_stop_internal()
+                
+                # Determine which logic to update
+                if logic.upper() == "A":
+                    target_logic = self.logic_a
+                    config_path = self.config_a_path
+                elif logic.upper() == "B":
+                    target_logic = self.logic_b
+                    config_path = self.config_b_path
+                else:
+                    logger.error(f"Invalid logic: {logic}")
+                    return False
+                
+                # Update all parameters
+                updated_count = 0
+                failed_params = []
+                
+                for parameter, value in parameters.items():
+                    try:
+                        # Navigate to parameter using dot notation
+                        config = target_logic.config
+                        keys = parameter.split('.')
+                        
+                        # Get old value for logging
+                        old_value = config
+                        for key in keys[:-1]:
+                            old_value = old_value[key]
+                        old_value = old_value[keys[-1]]
+                        
+                        # Set new value
+                        target = config
+                        for key in keys[:-1]:
+                            target = target[key]
+                        target[keys[-1]] = value
+                        
+                        # Log the change
+                        self.csv_logger.log_parameter_change(
+                            logic.upper(),
+                            parameter,
+                            old_value,
+                            value,
+                            "Engineer",
+                            "Bulk update via web interface"
+                        )
+                        
+                        logger.info(f"  ✓ {parameter}: {old_value} -> {value}")
+                        updated_count += 1
+                        
+                    except Exception as e:
+                        logger.error(f"  ✗ Failed to update {parameter}: {e}")
+                        failed_params.append(parameter)
+                
+                # Save to file
+                with open(config_path, 'w') as f:
+                    json.dump(target_logic.config, f, indent=2)
+                
+                logger.critical(f"✓ Configuration saved to {config_path}")
+                logger.critical(f"  Updated: {updated_count} parameters")
+                if failed_params:
+                    logger.error(f"  Failed: {len(failed_params)} parameters: {failed_params}")
+                logger.critical("  System stopped - select logic to restart")
+                
+                self.csv_logger.log_operation(
+                    logic.upper(),
+                    "System",
+                    "BulkConfigUpdate",
+                    "Success",
+                    details=f"Updated {updated_count} parameters, saved to {config_path}"
+                )
+                
+                return len(failed_params) == 0
+                
+            except Exception as e:
+                logger.error(f"Failed to update and save configuration: {e}", exc_info=True)
+                self.csv_logger.log_error("System", "Configuration", f"Bulk update failed: {e}")
                 return False
     
     def get_configuration(self, logic: str) -> Optional[Dict[str, Any]]:

@@ -74,12 +74,18 @@ class WebServer:
         def index():
             return render_template('index.html')
         
-        # Engineer menu page
+        # Engineer menu login page
         @self.app.route('/engineer')
         def engineer():
+            # Always show login page
+            return render_template('engineer_login.html')
+        
+        # Engineer menu authenticated page
+        @self.app.route('/engineer/dashboard')
+        def engineer_dashboard():
             if not session.get('engineer_authenticated'):
                 return render_template('engineer_login.html')
-            return render_template('engineer.html')
+            return render_template('engineer.html', simulate=self.execution_manager.hw.simulate)
         
         # Logs page
         @self.app.route('/logs')
@@ -263,14 +269,15 @@ class WebServer:
                 data = request.get_json()
                 password = data.get('password', '')
                 
-                if password == self.config.get('engineer_password', '1234'):
+                if password == self.config.get('engineer_password', 'engineer123'):
                     session['engineer_authenticated'] = True
-                    return jsonify({'success': True, 'message': 'Authentication successful'})
+                    session.permanent = True  # Keep session active
+                    return jsonify({'success': True, 'message': 'Logged in', 'redirect': '/engineer/dashboard'})
                 else:
-                    return jsonify({'error': 'Invalid password'}), 401
+                    return jsonify({'success': False, 'error': 'Invalid password'}), 401
             except Exception as e:
                 logger.error(f"Login error: {e}")
-                return jsonify({'error': str(e)}), 500
+                return jsonify({'success': False, 'error': str(e)}), 500
         
         # API: Engineer logout
         @self.app.route('/api/engineer/logout', methods=['POST'])
@@ -286,12 +293,12 @@ class WebServer:
                 config = self.execution_manager.get_configuration(logic.upper())
                 
                 if config:
-                    return jsonify(config)
+                    return jsonify({'success': True, 'config': config})
                 else:
-                    return jsonify({'error': 'Invalid logic'}), 400
+                    return jsonify({'success': False, 'error': 'Invalid logic'}), 400
             except Exception as e:
                 logger.error(f"Get config error: {e}")
-                return jsonify({'error': str(e)}), 500
+                return jsonify({'success': False, 'error': str(e)}), 500
         
         # API: Update parameter
         @self.app.route('/api/config/update', methods=['POST'])
@@ -314,6 +321,55 @@ class WebServer:
                     return jsonify({'error': 'Failed to update parameter'}), 400
             except Exception as e:
                 logger.error(f"Update parameter error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: Save configuration
+        @self.app.route('/api/config/save', methods=['POST'])
+        @self._require_auth
+        def save_configuration():
+            try:
+                data = request.get_json()
+                logic = data.get('logic', '').upper()
+                
+                if not logic:
+                    return jsonify({'error': 'Missing logic'}), 400
+                
+                success = self.execution_manager.save_configuration(logic)
+                
+                if success:
+                    return jsonify({
+                        'success': True, 
+                        'message': f'Configuration for Logic {logic} saved successfully. System stopped - please select logic to restart.'
+                    })
+                else:
+                    return jsonify({'error': 'Failed to save configuration'}), 400
+            except Exception as e:
+                logger.error(f"Save configuration error: {e}")
+                return jsonify({'error': str(e)}), 500
+        
+        # API: Update and save configuration (bulk update)
+        @self.app.route('/api/config/save-all', methods=['POST'])
+        @self._require_auth
+        def save_all_configuration():
+            try:
+                data = request.get_json()
+                logic = data.get('logic', '').upper()
+                parameters = data.get('parameters', {})
+                
+                if not logic or not parameters:
+                    return jsonify({'error': 'Missing logic or parameters'}), 400
+                
+                success = self.execution_manager.update_and_save_configuration(logic, parameters)
+                
+                if success:
+                    return jsonify({
+                        'success': True, 
+                        'message': f'All parameters saved successfully for Logic {logic}. System stopped - please select logic to restart.'
+                    })
+                else:
+                    return jsonify({'error': 'Some parameters failed to update'}), 400
+            except Exception as e:
+                logger.error(f"Save all configuration error: {e}")
                 return jsonify({'error': str(e)}), 500
         
         # API: GPIO Monitor - Get all pins status
